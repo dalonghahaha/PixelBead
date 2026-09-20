@@ -38,6 +38,12 @@ class Pattern(Base):
     prefilter: Mapped[str] = mapped_column(String(32), default="smooth", nullable=False)
     cleanup: Mapped[str] = mapped_column(String(32), default="majority", nullable=False)
     dither: Mapped[bool] = mapped_column(default=False, nullable=False)
+    bead_size: Mapped[str] = mapped_column(String(16), default="mini", nullable=False)  # ← 009 新增('mini' | 'midi')
+    # ← 007 新增 SEO 字段
+    is_public: Mapped[bool] = mapped_column(default=False, nullable=False, index=True)
+    public_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    og_image_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     color_counts: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     preview_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
     symbol_path: Mapped[str | None] = mapped_column(String(512), nullable=True)
@@ -46,3 +52,11 @@ class Pattern(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="patterns")
+
+
+class UserSettings(Base):  # ← 011 新增(spec 011 配套)
+    __tablename__ = "user_settings"
+
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    beads_per_pack: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { useLocale } from '@/components/I18nProvider';
 import type { PatternResult } from '@pixelbead/shared';
 
 export default function PatternsPage() {
   const router = useRouter();
   const { token, isLoggedIn, ready, logout } = useAuth();
+  const { t, locale } = useLocale();
   const [items, setItems] = useState<PatternResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,19 +36,19 @@ export default function PatternsPage() {
   return (
     <div className="max-w-6xl mx-auto py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">我的图纸</h1>
+        <h1 className="text-3xl font-bold">{t('patterns.title')}</h1>
         <div className="flex gap-3">
           <Link
             href="/generate"
             className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
           >
-            + 新建
+            {locale === 'en' ? '+ New' : '+ 新建'}
           </Link>
           <button
             onClick={logout}
             className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
           >
-            退出
+            {t('nav.logout')}
           </button>
         </div>
       </div>
@@ -66,6 +68,7 @@ export default function PatternsPage() {
             生成一个
           </Link>{' '}
           吧
+          {/* EN: {t('patterns.empty')} */}
         </div>
       )}
 

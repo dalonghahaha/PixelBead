@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import { useLocale } from '@/components/I18nProvider';
+import { trackAuthLogin, trackAuthSignup } from '@/lib/analytics';
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const { t, locale } = useLocale();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
@@ -26,6 +29,9 @@ export default function LoginPage() {
           ? await api.login({ email, password })
           : await api.register({ email, username, password });
       login(res.token, res.user);
+      // ← 006 G-006-8/9:埋点 - 登录/注册
+      if (mode === 'login') trackAuthLogin('password');
+      else trackAuthSignup('direct');
       router.push('/patterns');
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : '请求失败';
@@ -38,12 +44,13 @@ export default function LoginPage() {
   return (
     <div className="max-w-md mx-auto py-12">
       <h1 className="text-3xl font-bold mb-6 text-center">
+          {mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}
         {mode === 'login' ? '登录' : '注册'}
       </h1>
 
       <form onSubmit={submit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">邮箱</label>
+          <label className="block text-sm font-medium mb-1">{t('auth.emailLabel')}</label>
           <input
             type="email"
             required
@@ -56,7 +63,8 @@ export default function LoginPage() {
 
         {mode === 'register' && (
           <div>
-            <label className="block text-sm font-medium mb-1">用户名</label>
+            <label className="block text-sm font-medium mb-1">用户名
+          {/* {t('auth.usernameLabel')} */}</label>
             <input
               type="text"
               required
@@ -72,7 +80,7 @@ export default function LoginPage() {
         )}
 
         <div>
-          <label className="block text-sm font-medium mb-1">密码</label>
+          <label className="block text-sm font-medium mb-1">{t('auth.passwordLabel')}</label>
           <input
             type="password"
             required
@@ -95,7 +103,11 @@ export default function LoginPage() {
           disabled={loading}
           className="w-full py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition"
         >
-          {loading ? '处理中…' : mode === 'login' ? '登录' : '注册'}
+          {loading
+            ? (locale === 'en' ? 'Processing…' : '处理中…')
+            : mode === 'login'
+              ? t('auth.submitLogin')
+              : t('auth.submitRegister')}
         </button>
       </form>
 

@@ -69,3 +69,26 @@ volumes:
   postgres_data:
   redis_data:
   api_storage:
+
+  # ← 010 异步任务 worker 服务
+  worker:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: pixelbead-worker
+    command: python -m app.workers.generate_worker
+    environment:
+      DATABASE_URL: postgresql+psycopg://pixelbead:pixelbead_dev_pwd@postgres:5432/pixelbead
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_DIR: /app/storage
+      WORKER_CONCURRENCY: "2"
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ENV: ${SENTRY_ENV:-production}
+    volumes:
+      - api_storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped

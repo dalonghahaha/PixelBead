@@ -79,13 +79,47 @@ def _load_palettes() -> None:
         )
         _palettes_cache[p["id"]] = pal
 
+    # ← 005 新增:加载 name_en 翻译(从 data/palette-en.json)
+    try:
+        en_path = Path(__file__).resolve().parents[3] / "data" / "palette-en.json"
+        if en_path.exists():
+            with open(en_path, encoding="utf-8") as f:
+                en_data = json.load(f)
+            for pal in _palettes_cache.values():
+                for color in pal.colors:
+                    if color.code in en_data:
+                        color.name_en = en_data[color.code]
+    except Exception:
+        pass  # 翻译文件缺失不致命,fallback 到中文
+
 
 def list_palettes() -> list[dict[str, Any]]:
     _load_palettes()
     return [
-        {"id": p.id, "title": p.title, "standard": p.standard, "count": len(p.colors)}
+        {
+            "id": p.id,
+            "title": p.title,
+            "title_en": _try_load_title_en(p.id),  # ← 005 新增
+            "standard": p.standard,
+            "count": len(p.colors),
+        }
         for p in _palettes_cache.values()
     ]
+
+
+def _try_load_title_en(palette_id: str) -> str | None:
+    """加载色板标题英文(从 vendor palettes.json 的 title_en 字段取)
+    若无英文标题返回 None,客户端按 locale 决定显示 title 还是 title_en
+    """
+    try:
+        with open(PALETTES_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+        for p in data.get("palettes", []):
+            if p.get("id") == palette_id:
+                return p.get("title_en")  # 暂未加,留作 vendor 扩展
+    except Exception:
+        pass
+    return None
 
 
 def get_palette(pid: str) -> Palette:
@@ -237,6 +271,7 @@ def generate(
     prefilter: str = "smooth",
     cleanup: str = "majority",
     dither: bool = False,
+    bead_size: str = "mini",  # ← 009 新增:mini(2.6mm) | midi(5mm); 仅记录,不改变格子数算法
 ) -> PatternResult:
     """生成拼豆图纸主入口
 
@@ -249,7 +284,13 @@ def generate(
         prefilter: 'smooth' | 'none' — 是否做抗锯齿预处理
         cleanup: 'majority' | 'none' — 邻域多数清理
         dither: 是否启用 Floyd-Steinberg 抖动
+        bead_size: 拼豆规格('mini' 2.6mm | 'midi' 5mm)— 009 新增
+            仅作记录,影响格子物理大小(下游 PDF/Usage 协同),不改变格子数
     """
+    # bead_size 不参与格子数计算(Mini/Midi 同底板格子数可不同,但用户输入 width/height 即格子数)
+    # 算法层仅校验合法性
+    if bead_size not in ("mini", "midi"):
+        bead_size = "mini"  # 兜底:未知规格默认 mini
     pal = get_palette(palette_id)
     pal_lab, pal_colors = _palette_lab(pal)
 

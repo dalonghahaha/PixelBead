@@ -17,6 +17,7 @@ from ..db import get_db
 from ..deps import get_current_user
 from ..models import Pattern, User
 from ..services import pypindou_service
+from ..core.thresholds import SYNC_GENERATION_THRESHOLD as SYNC_THRESHOLD  # ← 010
 
 router = APIRouter(prefix="/patterns", tags=["patterns"])
 log = logging.getLogger(__name__)
@@ -33,6 +34,7 @@ class PatternOut(BaseModel):
     prefilter: str
     cleanup: str
     dither: bool
+    bead_size: str = "mini"  # ← 009 新增
     color_counts: dict[str, int] | None = None
     preview_url: str | None = None
     symbol_url: str | None = None
@@ -53,6 +55,7 @@ def _to_out(p: Pattern) -> PatternOut:
         prefilter=p.prefilter,
         cleanup=p.cleanup,
         dither=p.dither,
+        bead_size=p.bead_size,  # ← 009 新增
         color_counts=p.color_counts,
         preview_url=f"{base}/{p.id}/preview" if p.preview_path else None,
         symbol_url=f"{base}/{p.id}/symbol" if p.symbol_path else None,
@@ -72,17 +75,29 @@ async def create_pattern(
     prefilter: Annotated[str, Form()] = "smooth",
     cleanup: Annotated[str, Form()] = "majority",
     dither: Annotated[bool, Form()] = False,
+    bead_size: Annotated[str, Form(pattern=r"^(mini|midi)$")] = "mini",  # ← 009 新增
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """上传图片,同步生成拼豆图纸
+    """上传图片,生成拼豆图纸
 
-    MVP:同步处理(接受请求→算→返结果)。大图后续切异步。
+    路由分流(010):
+      - 小图(<=80×80):同步生成,返 PatternOut
+      - 大图(>80×80):转发到 POST /tasks,返 TaskResponse(task_id + status)
     """
     if not pypindou_service.is_available():
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="pypindou 不可用,无法生成图纸",
+        )
+
+    # ← 010 分流:大图自动转发到 /tasks
+    if width > SYNC_THRESHOLD or height > SYNC_THRESHOLD:
+        from .tasks import create_task  # 避免循环依赖
+        return await create_task(
+            file=file, palette=palette, width=width, height=height,
+            max_colors=max_colors, prefilter=prefilter, cleanup=cleanup,
+            dither=dither, bead_size=bead_size, db=db, current_user=current_user,
         )
 
     # 校验上传
@@ -110,6 +125,7 @@ async def create_pattern(
         prefilter=prefilter,
         cleanup=cleanup,
         dither=dither,
+        bead_size=bead_size,  # ← 009 新增
     )
     db.add(pattern)
     db.commit()
@@ -136,6 +152,7 @@ async def create_pattern(
             prefilter=prefilter,
             cleanup=cleanup,
             dither=dither,
+            bead_size=bead_size,  # ← 009 新增
         )
 
         # 渲染输出文件
@@ -196,6 +213,52 @@ def list_patterns(
         .all()
     )
     return [_to_out(p) for p in items]
+
+
+@router.get("/public", response_model=list[dict])
+def list_public_patterns(
+    db: Session = Depends(get_db),
+    limit: int = 1000,
+):
+    """spec 007 — 公开图纸列表(供 sitemap 使用)
+
+    返回:[{ id, updated_at }]
+    注:不要求登录(供 sitemap 爬虫访问)
+    """
+    items = (
+        db.query(Pattern.id, Pattern.public_at)
+        .filter(Pattern.is_public == True)  # noqa: E712
+        .order_by(Pattern.public_at.desc())
+        .limit(limit)
+        .all()
+    )
+    from datetime import datetime
+    return [
+        {
+            "id": p.id,
+            "updated_at": (p.public_at or datetime.utcnow()).isoformat() + "Z",
+        }
+        for p in items
+    ]
+
+
+@router.patch("/{pattern_id}/visibility")
+async def toggle_visibility(
+    pattern_id: str,
+    is_public: bool,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """spec 007 — 切换图纸公开/私有状态"""
+    from datetime import datetime
+
+    pat = db.get(Pattern, pattern_id)
+    if not pat or pat.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="图纸不存在")
+    pat.is_public = is_public
+    pat.public_at = datetime.utcnow() if is_public else None
+    db.commit()
+    return {"id": pat.id, "is_public": pat.is_public}
 
 
 @router.get("/{pattern_id}", response_model=PatternOut)

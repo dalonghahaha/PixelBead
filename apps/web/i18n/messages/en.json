@@ -1,0 +1,106 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "spec": "005-i18n-bilingual"
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Error",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "next": "Next",
+    "back": "Back",
+    "optional": "(optional)",
+    "required": "(required)"
+  },
+  "nav": {
+    "generate": "Generate",
+    "patterns": "My Patterns",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Sign up",
+    "languageSwitch": "Language"
+  },
+  "footer": {
+    "tagline": "Upload an image, get bead patterns in seconds",
+    "openSource": "Powered by open-source pypindou (Apache 2.0)",
+    "copyright": "© PixelBead MVP"
+  },
+  "landing": {
+    "heroTitle": "Upload an image, generate bead patterns in 3 seconds",
+    "heroSubtitle": "The most professional bead pattern generator. Open-source, lightweight, self-hostable.",
+    "ctaStart": "Start now →",
+    "feature1Title": "One-click generation",
+    "feature1Desc": "Upload an image, get printable patterns in 3 seconds",
+    "feature2Title": "Printable PDF",
+    "feature2Desc": "Each cell labeled with color codes + axis, ready to follow",
+    "feature3Title": "Usage export",
+    "feature3Desc": "Export to Excel / CSV, prepare materials hassle-free"
+  },
+  "generate": {
+    "title": "Upload Image → Bead Pattern",
+    "uploadLabel": "JPG/PNG/WEBP, max 10MB",
+    "paletteLabel": "Palette",
+    "widthLabel": "Width (cells)",
+    "heightLabel": "Height (cells)",
+    "maxColorsLabel": "Max colors (blank for no limit)",
+    "maxColorsPlaceholder": "No limit",
+    "prefilterLabel": "Prefilter",
+    "prefilterSmooth": "Smooth (recommended for photos)",
+    "prefilterNone": "None",
+    "cleanupLabel": "Cleanup",
+    "cleanupMajority": "Majority (recommended)",
+    "cleanupNone": "None",
+    "ditherLabel": "Enable dithering (for photo details, not recommended by default)",
+    "submitButton": "Generate",
+    "submittingButton": "Generating (may take a few seconds)…",
+    "resultSuccess": "✓ Generated · {count} colors used",
+    "previewLabel": "Preview",
+    "symbolLabel": "Symbol Chart",
+    "viewMyPatterns": "View my patterns →",
+    "previewOriginal": "Original Image",
+    "generateFailed": "Generation failed",
+    "beadSizeLabel": "Bead Size",
+    "beadSizeTooltipMini": "Mainstream small beads, ideal for detailed patterns (2.6mm)",
+    "beadSizeTooltipMidi": "Large beads, suitable for kids / low vision (5mm)",
+    "plateHint": "Board hint: {hint}",
+    "boardSizesDefault": "Different sizes suit different boards. Default: Mini."
+  },
+  "auth": {
+    "loginTitle": "Login",
+    "registerTitle": "Sign up",
+    "emailLabel": "Email",
+    "usernameLabel": "Username",
+    "passwordLabel": "Password",
+    "submitLogin": "Login",
+    "submitRegister": "Sign up",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "registerNow": "Sign up now",
+    "loginNow": "Login now",
+    "logoutSuccess": "Logged out"
+  },
+  "patterns": {
+    "title": "My Patterns",
+    "empty": "No patterns yet. Generate one?",
+    "createNew": "Generate new pattern",
+    "preview": "Preview",
+    "symbol": "Symbol",
+    "download": "Download",
+    "delete": "Delete"
+  },
+  "settings": {
+    "title": "Settings"
+  },
+  "errors": {
+    "networkFailed": "Network error, please retry",
+    "uploadFailed": "Upload failed",
+    "loginFailed": "Login failed",
+    "registerFailed": "Sign up failed",
+    "imageTooLarge": "Image too large (max 10MB)",
+    "imageFormatUnsupported": "Unsupported image format. Only JPG/PNG/WEBP allowed",
+    "unknown": "Unknown error"
+  }
+}

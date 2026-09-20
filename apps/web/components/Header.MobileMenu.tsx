@@ -3,16 +3,19 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
+import LanguageSwitcher from './LanguageSwitcher';
+import { useLocale } from './I18nProvider';
 
 /**
  * 移动端汉堡包菜单(Client Component)
- * 只在 < md(< 768px)显示。点开一个全宽抽屉,展开"生成图纸 / 我的图纸 / 登录/头像"。
+ * 只在 < md(< 768px)显示。点开一个全宽抽屉,展开"生成图纸 / 我的图纸 / 语言 / 登录/头像"。
  *
  * 头像菜单部分复用 Header.UserMenu 的 dropdown 模式,但移动端用全屏面板而不是 popover。
  */
 export function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const { user, ready, logout } = useAuth();
+  const { t } = useLocale();
   const ref = useRef<HTMLDivElement>(null);
 
   // ESC 关闭
@@ -113,7 +116,7 @@ export function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
                     onClick={handleLogout}
                     className="text-left px-4 py-3 min-h-[44px] inline-flex items-center text-base text-red-600 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
                   >
-                    退出登录
+                    {t('nav.logout')}
                   </button>
                 </>
               ) : (
@@ -122,9 +125,15 @@ export function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
                   onClick={() => setOpen(false)}
                   className="mx-2 mt-2 px-4 py-3 min-h-[44px] inline-flex items-center justify-center text-base bg-primary-700 text-white rounded-lg hover:bg-primary-800"
                 >
-                  登录
+                  {t('nav.login')}
                 </Link>
               )}
+              {/* ← 005 新增:语言切换(移动端放在登录按钮之后) */}
+              <div className="my-2 border-t border-gray-100 dark:border-gray-800" />
+              <div className="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">
+                {t('nav.languageSwitch')}
+              </div>
+              <LanguageSwitcher />
             </nav>
           </div>
         </>

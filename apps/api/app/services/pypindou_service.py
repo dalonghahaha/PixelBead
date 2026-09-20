@@ -29,6 +29,7 @@ def generate_pattern_safe(
     prefilter: str = "smooth",
     cleanup: str = "majority",
     dither: bool = False,
+    bead_size: str = "mini",  # ← 009 新增
 ) -> dict[str, Any]:
     """生成拼豆图纸,统一异常包装"""
     try:
@@ -41,6 +42,7 @@ def generate_pattern_safe(
             prefilter=prefilter,
             cleanup=cleanup,
             dither=dither,
+            bead_size=bead_size,  # ← 009 新增
         )
         return {
             "color_counts": result.color_counts,

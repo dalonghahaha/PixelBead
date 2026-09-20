@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { UserMenu } from './Header.UserMenu';
 import { MobileMenu } from './Header.MobileMenu';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export function Header({ loggedIn }: { loggedIn: boolean }) {
   return (
@@ -25,6 +26,8 @@ export function Header({ loggedIn }: { loggedIn: boolean }) {
           >
             我的图纸
           </Link>
+          {/* ← 005 新增:语言切换器(桌面端) */}
+          <LanguageSwitcher />
           {loggedIn ? (
             <div className="ml-2">
               <UserMenu />
@@ -39,7 +42,7 @@ export function Header({ loggedIn }: { loggedIn: boolean }) {
           )}
         </nav>
 
-        {/* 移动端汉堡(< 768px) */}
+        {/* 移动端汉堡(< 768px)— 包含语言切换器 */}
         <MobileMenu loggedIn={loggedIn} />
       </div>
     </header>

@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import type { PaletteInfo, PatternResult } from '@pixelbead/shared';
+import type { PaletteInfo, PatternResult, BeadSize } from '@pixelbead/shared';
+import { BEAD_SIZE_DEFAULT } from '@pixelbead/shared';
+import BeadSizeSelector from '@/components/BeadSizeSelector';
+import { plateSizeHint } from '@/lib/beadSize';
+import TaskStatusPoller from '@/components/TaskStatusPoller';
+import type { TaskCreateResponse } from '@/lib/task';
 
 export default function GeneratePage() {
   const router = useRouter();
@@ -20,9 +25,12 @@ export default function GeneratePage() {
   const [prefilter, setPrefilter] = useState('smooth');
   const [cleanup, setCleanup] = useState('majority');
   const [dither, setDither] = useState(false);
+  const [beadSize, setBeadSize] = useState<BeadSize>(BEAD_SIZE_DEFAULT);  // ← 009 新增
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PatternResult | null>(null);
+  // ← 010 异步任务:大图时服务端返回 task_id,前端轮询进度
+  const [asyncTaskId, setAsyncTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     api.palettes().then(setPalettes).catch(() => setPalettes([]));
@@ -58,10 +66,17 @@ export default function GeneratePage() {
           prefilter,
           cleanup,
           dither,
+          beadSize,  // ← 009 新增
         },
         token,
       );
-      setResult(r);
+      // ← 010 分流:大图服务端返回 task_id(异步任务),小图返回 PatternResult(同步)
+      if ('task_id' in r && (r as TaskCreateResponse).status === 'queued') {
+        setAsyncTaskId((r as TaskCreateResponse).task_id);
+        setResult(null);
+      } else {
+        setResult(r as PatternResult);
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : '生成失败');
     } finally {
@@ -71,6 +86,19 @@ export default function GeneratePage() {
 
   if (!ready) return <div className="py-12 text-center">加载中…</div>;
   if (!isLoggedIn) return null;
+
+  // ← 010 异步任务:大图走轮询组件(替换 result 区块)
+  if (asyncTaskId && token) {
+    return (
+      <div className="max-w-3xl mx-auto py-8">
+        <h1 className="text-3xl font-bold mb-6">生成中…</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+          大图生成需要更长时间,后台已加入队列,请稍候。
+        </p>
+        <TaskStatusPoller taskId={asyncTaskId} token={token} />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto py-8">
@@ -184,6 +212,12 @@ export default function GeneratePage() {
                 className="w-full px-3 py-2 border rounded-lg"
               />
             </div>
+          </div>
+
+          {/* ← 009 新增:拼豆规格选择 */}
+          <BeadSizeSelector value={beadSize} onChange={setBeadSize} locale="zh" />
+          <div className="text-xs text-gray-600 bg-gray-50 px-3 py-2 rounded">
+            底板提示:{plateSizeHint(width, height, beadSize, 'zh')}
           </div>
 
           <div>

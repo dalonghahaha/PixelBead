@@ -1,8 +1,21 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import type { Metadata } from 'next';
+import {
+  DEFAULT_LOCALE,
+  LOCALE_COOKIE,
+  makeT,
+  type Locale,
+} from '@/i18n/config';
+import { trackLandingCtaClick } from '@/lib/analytics';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
+/** SSR 阶段从 cookie 读 locale(005) */
+function getServerLocale(): Locale {
+  const c = cookies().get(LOCALE_COOKIE)?.value;
+  return c === 'en' ? 'en' : DEFAULT_LOCALE;
+}
 
 /** FR-5: SEO metadata + og + twitter */
 export function generateMetadata(): Metadata {
@@ -42,34 +55,51 @@ async function getPaletteCount(): Promise<number | null> {
 }
 
 export default async function HomePage() {
+  // ← 005:SSR 阶段拿 locale,服务端直接渲染目标语言
+  const locale = getServerLocale();
+  const t = makeT(locale);
+
   // Server Component 读 cookie 决定 CTA 路由(FR-3)
   const cookieStore = cookies();
   const tokenCookie = cookieStore.get('pixelbead_token');
   const loggedIn = !!tokenCookie?.value;
   const ctaHref = loggedIn ? '/generate' : '/login?redirect=/generate';
 
-  // FR-6 动态色板数
+  // FR-6 动态色板数(双语)
   const paletteCount = await getPaletteCount();
   const paletteText =
-    paletteCount !== null
-      ? `${paletteCount} 种真实拼豆色板`
-      : '20+ 种真实拼豆色板';
+    locale === 'en'
+      ? paletteCount !== null
+        ? `${paletteCount} real bead palettes`
+        : '20+ real bead palettes'
+      : paletteCount !== null
+        ? `${paletteCount} 种真实拼豆色板`
+        : '20+ 种真实拼豆色板';
 
   const features = [
     {
       icon: '📷',
-      title: '支持常见图片格式',
-      desc: 'JPG / PNG / WEBP,最大 10MB,上传即处理',
+      title: locale === 'en' ? 'Common image formats' : '支持常见图片格式',
+      desc:
+        locale === 'en'
+          ? 'JPG / PNG / WEBP, max 10MB, instant processing'
+          : 'JPG / PNG / WEBP,最大 10MB,上传即处理',
     },
     {
       icon: '🎨',
       title: paletteText,
-      desc: 'MARD / Artkal / COCO 等主流品牌,自动匹配色号',
+      desc:
+        locale === 'en'
+          ? 'MARD / Artkal / COCO mainstream brands, auto color matching'
+          : 'MARD / Artkal / COCO 等主流品牌,自动匹配色号',
     },
     {
       icon: '📥',
-      title: '一键导出可打印图纸',
-      desc: '带色号标注 + 网格线 + 用量清单,直接打印开拼',
+      title: locale === 'en' ? 'One-click printable export' : '一键导出可打印图纸',
+      desc:
+        locale === 'en'
+          ? 'Color codes + grid lines + usage list, print and go'
+          : '带色号标注 + 网格线 + 用量清单,直接打印开拼',
     },
   ];
 
@@ -81,7 +111,7 @@ export default async function HomePage() {
           PixelBead
         </h1>
         <p className="text-xl md:text-2xl text-gray-700 dark:text-gray-200 mb-3">
-          上传图片,3 秒生成拼豆图纸
+          {t('landing.heroSubtitle')}
         </p>
         <p className="text-base text-gray-500 dark:text-gray-400 mb-10">
           像素化 · 颜色匹配 · 网格导出,一气呵成
@@ -89,9 +119,10 @@ export default async function HomePage() {
         <div className="flex gap-4 justify-center">
           <Link
             href={ctaHref}
+            onClick={() => trackLandingCtaClick('hero')}
             className="inline-flex items-center px-8 py-3 min-h-[44px] bg-primary-700 text-white rounded-lg hover:bg-primary-800 hover:scale-105 active:bg-primary-900 active:scale-100 transition text-base font-medium shadow-lg shadow-primary-700/20"
           >
-            开始生成 →
+            {t('landing.ctaStart')}
           </Link>
         </div>
       </section>
@@ -118,55 +149,57 @@ export default async function HomePage() {
       <section className="max-w-4xl mx-auto">
         <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 items-center bg-gray-50 dark:bg-gray-800/30 rounded-2xl p-6 sm:p-8">
           <div>
-            <h2 className="text-2xl font-bold mb-3">从照片到拼豆,只需三步</h2>
+            <h2 className="text-2xl font-bold mb-3">
+              {locale === 'en' ? 'From photo to beads, 3 steps' : '从照片到拼豆,只需三步'}
+            </h2>
             <ol className="space-y-2 text-gray-700 dark:text-gray-300">
               <li className="flex gap-3">
                 <span className="shrink-0 w-6 h-6 rounded-full bg-primary-700 text-white text-sm flex items-center justify-center">
                   1
                 </span>
-                <span>上传任意图片</span>
+                <span>{locale === 'en' ? 'Upload any image' : '上传任意图片'}</span>
               </li>
               <li className="flex gap-3">
                 <span className="shrink-0 w-6 h-6 rounded-full bg-primary-700 text-white text-sm flex items-center justify-center">
                   2
                 </span>
-                <span>选择色板和网格大小</span>
+                <span>{locale === 'en' ? 'Choose palette & grid size' : '选择色板和网格大小'}</span>
               </li>
               <li className="flex gap-3">
                 <span className="shrink-0 w-6 h-6 rounded-full bg-primary-700 text-white text-sm flex items-center justify-center">
                   3
                 </span>
-                <span>下载带色号标注的图纸</span>
+                <span>{locale === 'en' ? 'Download color-labeled pattern' : '下载带色号标注的图纸'}</span>
               </li>
             </ol>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-sm">
             <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-3">
-              示例效果
+              {locale === 'en' ? 'Example' : '示例效果'}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <img
                   src="/examples/original.jpg"
-                  alt="拼豆图案示例原图(CC0 卡通小狗)"
+                  alt={locale === 'en' ? 'Example source image (CC0 cartoon dog)' : '拼豆图案示例原图(CC0 卡通小狗)'}
                   width={464}
                   height={464}
                   className="aspect-square rounded w-full object-cover"
                 />
                 <div className="text-xs text-center mt-2 text-gray-500 dark:text-gray-400">
-                  原图
+                  {locale === 'en' ? 'Original' : '原图'}
                 </div>
               </div>
               <div>
                 <img
                   src="/examples/pattern.png"
-                  alt="对应的拼豆图纸,29×29 网格,MARD 色板"
+                  alt={locale === 'en' ? 'Generated bead pattern, 29×29 grid, MARD palette' : '对应的拼豆图纸,29×29 网格,MARD 色板'}
                   width={464}
                   height={464}
                   className="aspect-square rounded w-full"
                 />
                 <div className="text-xs text-center mt-2 text-gray-500 dark:text-gray-400">
-                  拼豆图纸
+                  {locale === 'en' ? 'Pattern' : '拼豆图纸'}
                 </div>
               </div>
             </div>

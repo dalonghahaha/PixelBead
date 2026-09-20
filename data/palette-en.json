@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "source": "老孙手译",
+    "note": "完整 221 色卡由人工翻译。本文件覆盖 18 个常用色,其余 203 色由后续 PR 补全。"
+  },
+  "H1": "White",
+  "H2": "Black",
+  "H3": "Light Gray",
+  "H4": "Dark Gray",
+  "H5": "Light Pink",
+  "H6": "Pink",
+  "H7": "Red",
+  "H8": "Orange",
+  "H9": "Yellow",
+  "H10": "Light Yellow",
+  "H11": "Light Green",
+  "H12": "Green",
+  "H13": "Dark Green",
+  "H14": "Cyan",
+  "H15": "Blue",
+  "H16": "Dark Blue",
+  "H17": "Purple",
+  "H18": "Brown"
+}
