@@ -57,3 +57,4 @@ venv/
 apps/api/uploads/
 apps/api/storage/
 apps/web/.next/
+screenshots/
