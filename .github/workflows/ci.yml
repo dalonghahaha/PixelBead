@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  api-lint-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: pixelbead
+          POSTGRES_PASSWORD: pixelbead_dev_pwd
+          POSTGRES_DB: pixelbead
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:6
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - uses: astral-sh/setup-uv@v3
+      - name: 安装依赖
+        working-directory: apps/api
+        run: uv sync
+      - name: Ruff
+        working-directory: apps/api
+        run: uv run ruff check .
+      - name: 测试
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql+psycopg://pixelbead:pixelbead_dev_pwd@localhost:5432/pixelbead
+          REDIS_URL: redis://localhost:6379/0
+          JWT_SECRET: ci_test_secret_at_least_32_characters_long
+        run: uv run pytest -v
+
+  web-lint-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm -r --filter web lint
+      - name: 类型检查
+        run: pnpm -r --filter web typecheck
+      - name: Build
+        run: pnpm -r --filter web build

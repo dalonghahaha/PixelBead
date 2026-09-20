@@ -1,0 +1,20 @@
+{
+  "name": "pixelbead",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PixelBead — 上传图片生成拼豆图纸",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@9.15.9"
+}
