@@ -32,7 +32,7 @@ export function Header({ loggedIn }: { loggedIn: boolean }) {
           ) : (
             <Link
               href="/login"
-              className="ml-2 px-4 py-2 min-h-[44px] inline-flex items-center text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
+              className="ml-2 px-4 py-2 min-h-[44px] inline-flex items-center text-sm bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition"
             >
               登录
             </Link>

@@ -22,8 +22,10 @@ export function UserMenu() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const initial =
-    (ready && user && (user.username?.[0] || user.email?.[0] || 'U'))?.toUpperCase() || '·';
+  const initialChar: string = ready && user
+    ? (user.username?.[0] || user.email?.[0] || 'U')
+    : '·';
+  const initial = String(initialChar).toUpperCase();
 
   return (
     <div className="relative" ref={ref}>

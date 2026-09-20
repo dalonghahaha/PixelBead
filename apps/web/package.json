@@ -11,19 +11,23 @@
     "test": "echo 'no tests yet'"
   },
   "dependencies": {
+    "@pixelbead/shared": "workspace:*",
     "next": "14.2.18",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "@pixelbead/shared": "workspace:*"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^22.10.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "autoprefixer": "^10.4.20",
+    "axe-core": "^4.13.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "14.2.18",
     "postcss": "^8.4.49",
+    "puppeteer-core": "^25.11.0",
     "tailwindcss": "^3.4.16",
     "typescript": "^5.6.3"
   }

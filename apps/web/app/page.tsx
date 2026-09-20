@@ -89,7 +89,7 @@ export default async function HomePage() {
         <div className="flex gap-4 justify-center">
           <Link
             href={ctaHref}
-            className="inline-flex items-center px-8 py-3 min-h-[44px] bg-primary-600 text-white rounded-lg hover:bg-primary-700 hover:scale-105 active:bg-primary-800 active:scale-100 transition text-base font-medium shadow-lg shadow-primary-600/20"
+            className="inline-flex items-center px-8 py-3 min-h-[44px] bg-primary-700 text-white rounded-lg hover:bg-primary-800 hover:scale-105 active:bg-primary-900 active:scale-100 transition text-base font-medium shadow-lg shadow-primary-700/20"
           >
             开始生成 →
           </Link>
@@ -121,19 +121,19 @@ export default async function HomePage() {
             <h2 className="text-2xl font-bold mb-3">从照片到拼豆,只需三步</h2>
             <ol className="space-y-2 text-gray-700 dark:text-gray-300">
               <li className="flex gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center">
+                <span className="shrink-0 w-6 h-6 rounded-full bg-primary-700 text-white text-sm flex items-center justify-center">
                   1
                 </span>
                 <span>上传任意图片</span>
               </li>
               <li className="flex gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center">
+                <span className="shrink-0 w-6 h-6 rounded-full bg-primary-700 text-white text-sm flex items-center justify-center">
                   2
                 </span>
                 <span>选择色板和网格大小</span>
               </li>
               <li className="flex gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-primary-600 text-white text-sm flex items-center justify-center">
+                <span className="shrink-0 w-6 h-6 rounded-full bg-primary-700 text-white text-sm flex items-center justify-center">
                   3
                 </span>
                 <span>下载带色号标注的图纸</span>

@@ -15,6 +15,7 @@
 | 001 项目骨架 | ✅ 完成 | `specs/001-project-bootstrap/` |
 | 002 用户系统 | ✅ 完成 | `specs/002-user-auth/` |
 | 003 图纸生成 | ✅ 完成 | `specs/003-image-to-bead-pattern/` |
+| 004 首页打磨 | ✅ 完成 | `specs/004-landing-page-polish/` |
 
 **已实现能力:**
 - 用户注册 / 登录(JWT 鉴权)
@@ -24,6 +25,16 @@
 - 同步生成拼豆图纸(预览图 + 符号图)
 - 色号用量统计
 - 个人图纸列表 / 下载
+- 首页产品化(真实示例图 + 动态色板数 + SEO meta + auth-aware Header + 移动端汉堡菜单 + 3 段页脚)
+
+## 后续规划 spec(未实现)
+
+| 编号 | 主题 | 描述 |
+|------|------|------|
+| 005 | i18n 多语言 | 引入 next-intl,支持中英双语切换 |
+| 006 | 社会证明 | 用户评价区块 / 案例区块 / 用户数徽章 |
+| 007 | 行为埋点 | GA4 / Plausible / 自建事件追踪 |
+| 008 | SEO 基础 | sitemap.xml / robots.txt / 结构化数据(Schema.org) |
 
 ---
 

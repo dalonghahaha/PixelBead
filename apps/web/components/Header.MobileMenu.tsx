@@ -120,7 +120,7 @@ export function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="mx-2 mt-2 px-4 py-3 min-h-[44px] inline-flex items-center justify-center text-base bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  className="mx-2 mt-2 px-4 py-3 min-h-[44px] inline-flex items-center justify-center text-base bg-primary-700 text-white rounded-lg hover:bg-primary-800"
                 >
                   登录
                 </Link>
