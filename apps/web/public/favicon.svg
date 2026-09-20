@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" shape-rendering="crispEdges">
+  <title>PixelBead</title>
+  <!-- 8×8 pixel bead grid stylized "P" -->
+  <!-- top horizontal of P -->
+  <rect x="1" y="1" width="3" height="1" fill="#0284c7"/>
+  <!-- left vertical of P -->
+  <rect x="1" y="2" width="1" height="3" fill="#0284c7"/>
+  <!-- middle horizontal of P -->
+  <rect x="1" y="4" width="3" height="1" fill="#0284c7"/>
+  <!-- right vertical of P (the closed loop) -->
+  <rect x="4" y="2" width="1" height="2" fill="#0284c7"/>
+  <!-- colored beads inside the loop -->
+  <rect x="2" y="2" width="1" height="1" fill="#fb923c"/>
+  <rect x="3" y="2" width="1" height="1" fill="#fbbf24"/>
+  <rect x="2" y="3" width="1" height="1" fill="#22c55e"/>
+  <rect x="3" y="3" width="1" height="1" fill="#ec4899"/>
+</svg>
