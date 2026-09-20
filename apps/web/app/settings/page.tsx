@@ -27,7 +27,7 @@ export default function SettingsPage() {
     }
     if (!token) return;
     api.getUserSettings(token)
-      .then((s) => setBeadsPerPack(s.beadsPerPack))
+      .then((s) => setBeadsPerPack(s.beads_per_pack))
       .catch((e) => setError(e instanceof ApiError ? e.message : '加载失败'));
   }, [ready, isLoggedIn, token, router]);
 
@@ -35,7 +35,7 @@ export default function SettingsPage() {
     if (!token) return;
     try {
       const updated = await api.patchUserSettings(token, val);
-      setBeadsPerPack(updated.beadsPerPack);
+      setBeadsPerPack(updated.beads_per_pack);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (e) {

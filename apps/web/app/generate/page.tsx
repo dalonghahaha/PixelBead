@@ -66,7 +66,7 @@ export default function GeneratePage() {
           prefilter,
           cleanup,
           dither,
-          beadSize,  // ← 009 新增
+          bead_size: beadSize,  // ← 009 新增(后端字段名)
         },
         token,
       );

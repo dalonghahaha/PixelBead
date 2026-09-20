@@ -1,7 +1,6 @@
 [project]
 name = "pixelbead-api"
 version = "0.1.0"
-description = "PixelBead API - FastAPI + pypindou"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.115.0",
@@ -16,7 +15,6 @@ dependencies = [
     "python-multipart>=0.0.18",
     "python-jose[cryptography]>=3.3.0",
     "passlib[bcrypt]>=1.7.4",
-    "pypindou>=0.1.3",
     "pillow>=11.0.0",
     "openpyxl>=3.1.0",  # ← 011 新增:Excel 生成
     "httpx>=0.28.0",
