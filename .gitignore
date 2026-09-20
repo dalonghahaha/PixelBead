@@ -37,3 +37,7 @@ coverage/
 # Misc
 *.local
 .cache/
+
+# Spec Kit workspace: only track init-options.json + memory/, ignore local template/script copies
+.specify/templates/
+.specify/scripts/
