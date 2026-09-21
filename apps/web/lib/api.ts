@@ -60,7 +60,52 @@ async function request<T>(
     } catch {}
     throw new ApiError(res.status, detail);
   }
-  return res.json();
+  return normalizeResponse(await res.json()) as T;
+}
+
+/**
+ * 响应归一化器(API 返是 Python 风格蛇形 + Docker 内网绝对 URL,前端要驼峰 + 相对代理 URL)
+ * 1. 深层 snake_case → camelCase(created_at → createdAt 等)
+ * 2. previewUrl / symbolUrl 里有 "http://" 的,改为走 Next.js 反代 /api/external/...
+ *    避免浏览器去抓 Docker 内网 URL(api:8000 不可达)
+ */
+function normalizeResponse<T>(data: T): T {
+  const camel = camelizeKeys(data);
+  rewritePatternAssetUrls(camel);
+  return camel as T;
+}
+
+function camelizeKeys(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(camelizeKeys);
+  if (obj && typeof obj === 'object' && !(obj instanceof Date)) {
+    return Object.fromEntries(
+      Object.entries(obj as Record<string, unknown>).map(([k, v]) => [
+        k.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase()),
+        camelizeKeys(v),
+      ]),
+    );
+  }
+  return obj;
+}
+
+function rewritePatternAssetUrls(obj: unknown): void {
+  if (Array.isArray(obj)) {
+    obj.forEach(rewritePatternAssetUrls);
+    return;
+  }
+  if (!obj || typeof obj !== 'object' || obj instanceof Date) return;
+  const o = obj as Record<string, unknown>;
+  // 单个 PatternResult
+  if (typeof o.id === 'string') {
+    if (typeof o.previewUrl === 'string' && /^https?:/.test(o.previewUrl)) {
+      o.previewUrl = `/api/external/patterns/${o.id}/preview`;
+    }
+    if (typeof o.symbolUrl === 'string' && /^https?:/.test(o.symbolUrl)) {
+      o.symbolUrl = `/api/external/patterns/${o.id}/symbol`;
+    }
+  }
+  // 递归子对象
+  for (const v of Object.values(o)) rewritePatternAssetUrls(v);
 }
 
 export const api = {

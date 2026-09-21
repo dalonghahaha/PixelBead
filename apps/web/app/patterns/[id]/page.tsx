@@ -82,7 +82,7 @@ export default function PatternDetailPage({ params }: Props) {
       <JsonLdCreativeWork
         patternId={pattern.id}
         name={`${pattern.width}×${pattern.height} Bead Pattern`}
-        datePublished={pattern.createdAt}
+        datePublished={pattern.createdAt || new Date().toISOString()}
         beadSize={pattern.beadSize as BeadSize}
       />
 
@@ -105,7 +105,7 @@ export default function PatternDetailPage({ params }: Props) {
             <div>
               <div className="text-sm font-medium mb-2">{locale === 'en' ? 'Preview' : '拼豆预览'}</div>
               <img
-                src={`http://localhost:8000${pattern.previewUrl}`}
+                src={pattern.previewUrl}
                 alt="拼豆预览"
                 className="w-full border rounded"
               />
@@ -115,7 +115,7 @@ export default function PatternDetailPage({ params }: Props) {
             <div>
               <div className="text-sm font-medium mb-2">{locale === 'en' ? 'Symbol Chart' : '符号图'}</div>
               <img
-                src={`http://localhost:8000${pattern.symbolUrl}`}
+                src={pattern.symbolUrl}
                 alt="符号图"
                 className="w-full border rounded"
               />

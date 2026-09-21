@@ -144,7 +144,7 @@ export default function GeneratePage() {
                 <div>
                   <div className="text-sm font-medium mb-1">拼豆预览</div>
                   <img
-                    src={`http://localhost:8000${result.previewUrl}`}
+                    src={result.previewUrl}
                     alt="拼豆预览"
                     className="max-w-full border rounded"
                   />
@@ -154,7 +154,7 @@ export default function GeneratePage() {
                 <div>
                   <div className="text-sm font-medium mb-1">符号图</div>
                   <img
-                    src={`http://localhost:8000${result.symbolUrl}`}
+                    src={result.symbolUrl}
                     alt="符号图"
                     className="max-w-full border rounded"
                   />

@@ -80,7 +80,7 @@ export default function PatternsPage() {
           >
             {p.previewUrl ? (
               <img
-                src={`http://localhost:8000${p.previewUrl}`}
+                src={p.previewUrl}
                 alt="预览"
                 className="w-full aspect-square object-contain bg-gray-50"
               />
@@ -114,7 +114,7 @@ export default function PatternsPage() {
               </div>
               {p.symbolUrl && (
                 <a
-                  href={`http://localhost:8000${p.symbolUrl}`}
+                  href={p.symbolUrl}
                   download={`pattern-${p.id}.png`}
                   className="block text-center text-xs text-primary-600 hover:underline pt-1"
                 >
