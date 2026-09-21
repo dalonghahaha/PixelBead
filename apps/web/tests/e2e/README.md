@@ -52,3 +52,4 @@ test('登录页视觉 + a11y', async ({ page }) => {
 | 改了源码但截图没变 | 确认 baseURL 指向 dev server(`3100`),不是 standalone build(`3000`) |
 | 截图差异过大 | 检查 UI 是不是真改了;小改动可以调 `maxDiffPixelRatio` 或 `--update-snapshots` |
 | axe 报 nested-interactive | 拆分 — 触发按钮不要放在 `role="radio"` / `role="button"` 里 |
+| 截图里 logo / 图片全是破图占位符 | `domcontentloaded` 太早,`<img>` 还在异步拉。spec 里调 `waitForImagesLoaded(page)`(轮询 `document.images.every(img.complete && img.naturalWidth > 0)`,10s 超时)再 `toHaveScreenshot` |

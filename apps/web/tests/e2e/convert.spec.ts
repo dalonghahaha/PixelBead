@@ -1,6 +1,22 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+/** 等所有 <img> 加载完成,避免头less 截到破图占位符 */
+async function waitForImagesLoaded(page: import('@playwright/test').Page) {
+  await page
+    .waitForFunction(
+      () =>
+        Array.from(document.images).every(
+          (img) => img.complete && img.naturalWidth > 0,
+        ),
+      null,
+      { timeout: 10_000 },
+    )
+    .catch(() => {
+      /* 部分图片可能故意失败(如占位),不阻断 */
+    });
+}
+
 /**
  * 转换页 — 视觉基线 + a11y 扫描
  * 路径: GET /generate
@@ -46,6 +62,9 @@ test.describe('Convert page', () => {
 
     // 等 client-side useAuth 水合完 + 守卫放行 + 表单出现
     await expect(page.getByRole('heading', { name: '上传图片 → 拼豆图纸' })).toBeVisible({ timeout: 15_000 });
+
+    // 等所有图片加载完(logo / examples / og / 用户头像),避免头less 截到破图占位符
+    await waitForImagesLoaded(page);
 
     // 等色板列表请求完成(api.palettes() 在 useEffect 里跑)
     await page.waitForResponse(
