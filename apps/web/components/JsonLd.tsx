@@ -12,7 +12,7 @@ interface SoftwareAppProps {
 export function JsonLdSoftwareApp({
   name = 'PixelBead',
   description = '上传图片,3 秒生成可打印拼豆图纸',
-  url = 'https://pixelbead.app',
+  url = 'https://pixel.iiclub.com.cn',
 }: SoftwareAppProps) {
   const ld = {
     '@context': 'https://schema.org',
@@ -61,11 +61,11 @@ export function JsonLdCreativeWork({
   const ld = {
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',
-    '@id': `https://pixelbead.app/patterns/${patternId}`,
+    '@id': `https://pixel.iiclub.com.cn/patterns/${patternId}`,
     name,
     author: { '@type': 'Person', name: author },
     datePublished: datePublished || new Date().toISOString(),
-    image: image || `https://pixelbead.app/og/${patternId}.png`,
+    image: image || `https://pixel.iiclub.com.cn/og/${patternId}.png`,
     keywords: ['拼豆', '拼豆图纸', 'bead pattern', 'pixel art', beadSize].join(','),
     encodingFormat: 'image/png',
   };

@@ -7,7 +7,7 @@ import {
   makeT,
   type Locale,
 } from '@/i18n/config';
-import { trackLandingCtaClick } from '@/lib/analytics';
+import CtaLink from '@/components/CtaLink';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -117,13 +117,13 @@ export default async function HomePage() {
           像素化 · 颜色匹配 · 网格导出,一气呵成
         </p>
         <div className="flex gap-4 justify-center">
-          <Link
+          <CtaLink
+            position="hero"
             href={ctaHref}
-            onClick={() => trackLandingCtaClick('hero')}
             className="inline-flex items-center px-8 py-3 min-h-[44px] bg-primary-700 text-white rounded-lg hover:bg-primary-800 hover:scale-105 active:bg-primary-900 active:scale-100 transition text-base font-medium shadow-lg shadow-primary-700/20"
           >
             {t('landing.ctaStart')}
-          </Link>
+          </CtaLink>
         </div>
       </section>
 

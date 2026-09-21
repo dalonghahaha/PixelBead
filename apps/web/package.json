@@ -12,9 +12,14 @@
   },
   "dependencies": {
     "@pixelbead/shared": "workspace:*",
+    "@sentry/browser": "^10.75.0",
+    "@sentry/nextjs": "^10.75.0",
+    "jspdf": "^4.2.1",
+    "jszip": "^3.10.2",
     "next": "14.2.18",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "svg2pdf.js": "^2.8.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

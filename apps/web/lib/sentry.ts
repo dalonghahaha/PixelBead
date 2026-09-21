@@ -27,6 +27,6 @@ export async function initSentryBrowser(): Promise<void> {
     });
   } catch (e) {
     // 静默失败,不影响主流程
-    if (import.meta.env.DEV) console.warn('Sentry init failed:', e);
+    if (process.env.NODE_ENV !== 'production') console.warn('Sentry init failed:', e);
   }
 }

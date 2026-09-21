@@ -12,7 +12,7 @@ declare global {
   }
 }
 
-const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || 'pixelbead.app';
+const PLAUSIBLE_DOMAIN = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || 'pixel.iiclub.com.cn';
 
 /** ← 006 G-006-1:重新导出供 layout 导入 */
 export { initPlausible as initPlausibleAnalytics };
@@ -36,7 +36,7 @@ export function trackEvent(event: string, props?: Record<string, unknown>): void
     window.plausible(event, { props: props || {} });
   } catch (e) {
     // 静默失败,不影响主流程
-    if (import.meta.env.DEV) console.warn('plausible track failed:', e);
+    if (process.env.NODE_ENV !== 'production') console.warn('plausible track failed:', e);
   }
 }
 

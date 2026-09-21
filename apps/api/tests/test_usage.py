@@ -52,27 +52,19 @@ def test_items_sorted_by_count_desc():
     pass
 
 
-@pytest.mark.parametrize("beads_per_pack,expected_packs", [
-    (500, 1),    # 256 → ceil(256/500) = 1
-    (500, 2),    # 501 → ceil(501/500) = 2
-    (500, 3),    # 1001 → ceil(1001/500) = 3
-    (1000, 0),   # 256 → ceil(256/1000) = 1 → 但实际是 1 不是 0
-    (1000, 1),   # 1001 → ceil(1001/1000) = 2
-    (100, 6),    # 501 → ceil(501/100) = 6
+@pytest.mark.parametrize("count,beads_per_pack,expected_packs", [
+    (256, 500, 1),
+    (501, 500, 2),
+    (1000, 500, 2),
+    (1001, 500, 3),
+    (256, 1000, 1),
+    (1001, 1000, 2),
+    (501, 100, 6),
 ])
-def test_pack_formula(beads_per_pack, expected_packs):
-    """参数化测试包数公式"""
-    import math
-    count = 501
+def test_pack_formula(count, beads_per_pack, expected_packs):
+    """packs = ceil(count / beads_per_pack)"""
     packs = 0 if count == 0 else -(-count // beads_per_pack)
-    if count == 256 and beads_per_pack == 1000:
-        assert packs == 1
-    elif count == 256 and beads_per_pack == 500:
-        assert packs == 1
-    elif count == 501 and beads_per_pack == 500:
-        assert packs == 2
-    else:
-        assert packs == expected_packs
+    assert packs == expected_packs, f"count={count}, bpp={beads_per_pack}, got {packs}"
 
 
 def test_count_zero_packs_zero():
@@ -85,9 +77,13 @@ def test_count_zero_packs_zero():
 def test_xlsx_filename_format():
     """Excel 文件名:pixelbead-usage-{id}-{YYYYMMDD}.xlsx"""
     from datetime import datetime
-    pattern_id = "abc123"
+    pattern_id = "abc123def456"
     filename = f"pixelbead-usage-{pattern_id[:8]}-{datetime.utcnow().strftime('%Y%m%d')}.xlsx"
-    assert filename.startswith("pixelbead-usage-abc12345-")
+    assert filename.startswith("pixelbead-usage-abc123de-")
+    # 短 ID(< 8 字符)边界
+    short = "abc"
+    short_fn = f"pixelbead-usage-{short[:8]}-20260101.xlsx"
+    assert short_fn.startswith("pixelbead-usage-abc-")
     assert filename.endswith(".xlsx")
 
 

@@ -51,7 +51,7 @@ async function request<T>(
     headers.set('Content-Type', 'application/json');
   }
 
-  const res = await fetch(`${API_URL}${path}`, { ...init, headers });
+  const res = await fetch(`/api/external${path}`, { ...init, headers });
   if (!res.ok) {
     let detail = res.statusText;
     try {
@@ -117,8 +117,8 @@ export const api = {
   listPatterns: (token: string) =>
     request<PatternResult[]>('/patterns', {}, token),
 
-  previewUrl: (id: string) => `${API_URL}/patterns/${id}/preview`,
-  symbolUrl: (id: string) => `${API_URL}/patterns/${id}/symbol`,
+  previewUrl: (id: string) => `/api/external/patterns/${id}/preview`,
+  symbolUrl: (id: string) => `/api/external/patterns/${id}/symbol`,
 
   // ← 008 新增:grid 数据(PDF 渲染用)
   getPatternGrid: (id: string, token: string, locale: 'zh' | 'en' = 'zh') =>

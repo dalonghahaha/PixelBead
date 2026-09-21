@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
       });
     } catch (e) {
       // 静默失败
-      if (import.meta.env.DEV) console.warn('Sentry capture failed:', e);
+      if (process.env.NODE_ENV !== 'production') console.warn('Sentry capture failed:', e);
     }
   }
 

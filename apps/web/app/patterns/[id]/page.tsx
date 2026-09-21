@@ -27,7 +27,7 @@ export default function PatternDetailPage({ params }: Props) {
   const router = useRouter();
   const { token, isLoggedIn, ready } = useAuth();
   const { locale } = useLocale();
-  const [pattern, setPattern] = useState<PatternResult | null>(null);
+  const [pattern, setPattern] = useState<(PatternResult & { isPublic?: boolean }) | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [beadsPerPack, setBeadsPerPack] = useState(500);
   const [toggling, setToggling] = useState(false);
@@ -41,7 +41,7 @@ export default function PatternDetailPage({ params }: Props) {
           setError('图纸不存在');
           return;
         }
-        setPattern(found);
+        setPattern(found as PatternResult & { isPublic?: boolean });
         // 加载用户设置(beads_per_pack)
         api.getUserSettings(token)
           .then((s) => setBeadsPerPack(s.beads_per_pack))
@@ -147,7 +147,7 @@ export default function PatternDetailPage({ params }: Props) {
           {/* 008 PDF 导出 */}
           <div className="border-t pt-4">
             <h3 className="font-medium mb-3">{locale === 'en' ? 'Export' : '导出'}</h3>
-            <ExportPdfPanel patternId={pattern.id} token={token} />
+            {token && <ExportPdfPanel patternId={pattern.id} token={token} />}
           </div>
 
           {/* 007 公开图纸切换 */}
@@ -184,7 +184,7 @@ export default function PatternDetailPage({ params }: Props) {
       {/* 011 用量清单 */}
       <div className="border-t pt-8">
         <h2 className="text-2xl font-bold mb-4">{locale === 'en' ? 'Usage' : '用量清单'}</h2>
-        <UsageTable patternId={pattern.id} token={token} beadsPerPack={beadsPerPack} locale={locale} />
+        {token && <UsageTable patternId={pattern.id} token={token} beadsPerPack={beadsPerPack} locale={locale} />}
       </div>
     </div>
   );
