@@ -15,6 +15,8 @@ export default function PatternsPage() {
   const [items, setItems] = useState<PatternResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [viewingSymbol, setViewingSymbol] = useState<PatternResult | null>(null);
 
   useEffect(() => {
     if (ready && !isLoggedIn) router.push('/login');
@@ -29,6 +31,25 @@ export default function PatternsPage() {
       .catch((e) => setError(e instanceof ApiError ? e.message : '加载失败'))
       .finally(() => setLoading(false));
   }, [token]);
+
+  async function handleDelete(p: PatternResult) {
+    if (!token) return;
+    const ok = window.confirm(
+      locale === 'en'
+        ? `Delete pattern ${p.id.slice(0, 8)}? This cannot be undone.`
+        : `确定删除图纸 ${p.id.slice(0, 8)} 吗?不可撤销。`,
+    );
+    if (!ok) return;
+    setDeletingId(p.id);
+    try {
+      await api.deletePattern(p.id, token);
+      setItems((arr) => arr.filter((i) => i.id !== p.id));
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : '删除失败');
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   if (!ready) return <div className="py-12 text-center">加载中…</div>;
   if (!isLoggedIn) return null;
@@ -113,18 +134,87 @@ export default function PatternsPage() {
                 {new Date(p.createdAt).toLocaleString('zh-CN')}
               </div>
               {p.symbolUrl && (
-                <a
-                  href={p.symbolUrl}
-                  download={`pattern-${p.id}.png`}
-                  className="block text-center text-xs text-primary-600 hover:underline pt-1"
-                >
-                  下载符号图
-                </a>
+                <div className="flex items-center justify-between pt-1 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setViewingSymbol(p)}
+                    className="text-xs text-primary-600 hover:underline"
+                  >
+                    {locale === 'en' ? 'View symbol' : '查看符号图'}
+                  </button>
+                  <a
+                    href={p.symbolUrl}
+                    download={`pattern-${p.id}.png`}
+                    className="text-xs text-gray-500 hover:underline"
+                  >
+                    {locale === 'en' ? 'Download' : '下载'}
+                  </a>
+                </div>
               )}
+              <button
+                type="button"
+                onClick={() => handleDelete(p)}
+                disabled={deletingId === p.id}
+                className="block w-full text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded py-1 mt-1 disabled:opacity-50"
+              >
+                {deletingId === p.id
+                  ? locale === 'en'
+                    ? 'Deleting…'
+                    : '删除中…'
+                  : locale === 'en'
+                    ? 'Delete'
+                    : '删除'}
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      {/* 符号图查看 modal */}
+      {viewingSymbol && viewingSymbol.symbolUrl && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+          onClick={() => setViewingSymbol(null)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 rounded-lg p-4 max-w-4xl max-h-[90vh] overflow-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-semibold">
+                {locale === 'en' ? 'Symbol Chart' : '符号图'} ·{' '}
+                <span className="font-mono text-gray-500">
+                  {viewingSymbol.id.slice(0, 8)}
+                </span>
+              </h3>
+              <button
+                type="button"
+                aria-label="关闭"
+                onClick={() => setViewingSymbol(null)}
+                className="w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-2xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+            <img
+              src={viewingSymbol.symbolUrl}
+              alt="符号图"
+              className="max-w-full mx-auto"
+            />
+            <div className="flex gap-3 mt-3 justify-end">
+              <a
+                href={viewingSymbol.symbolUrl}
+                download={`pattern-${viewingSymbol.id}.png`}
+                className="px-3 py-1.5 bg-primary-600 text-white text-sm rounded hover:bg-primary-700"
+              >
+                {locale === 'en' ? 'Download' : '下载符号图'}
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

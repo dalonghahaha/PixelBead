@@ -60,6 +60,8 @@ async function request<T>(
     } catch {}
     throw new ApiError(res.status, detail);
   }
+  // 204 No Content: DELETE 返这个,没有 body,不要 res.json()
+  if (res.status === 204) return undefined as T;
   return normalizeResponse(await res.json()) as T;
 }
 
@@ -165,6 +167,9 @@ export const api = {
 
   listPatterns: (token: string) =>
     request<PatternResult[]>('/patterns', {}, token),
+
+  deletePattern: (id: string, token: string) =>
+    request<void>(`/patterns/${id}`, { method: 'DELETE' }, token),
 
   previewUrl: (id: string) => `/api/external/patterns/${id}/preview`,
   symbolUrl: (id: string) => `/api/external/patterns/${id}/symbol`,

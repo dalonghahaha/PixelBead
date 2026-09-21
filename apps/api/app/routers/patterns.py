@@ -1,6 +1,7 @@
 """拼豆图纸端点 - 上传 + 生成 + 列表 + 下载"""
 import io
 import logging
+import shutil
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -309,3 +310,26 @@ def get_symbol(
     if not pat or pat.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="图纸不存在")
     return FileResponse(_safe_resolve(pat, "symbol"), media_type="image/png")
+
+
+@router.delete("/{pattern_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_pattern(
+    pattern_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """删除当前用户的图纸(DB 行 + storage 文件)
+
+    安全:只能删自己的(pat.user_id != current_user → 404,不区分存在与否防枚举)
+    原子:文件删失败不阻断 DB 删(DB 是真源),但 try/except 防 storage 路径不存在。
+    """
+    pat = db.get(Pattern, pattern_id)
+    if not pat or pat.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="图纸不存在")
+    # 删 storage 目录(整张图含 preview + symbol + grid)
+    storage_dir = settings.storage_path / "patterns" / pattern_id
+    if storage_dir.exists():
+        shutil.rmtree(storage_dir, ignore_errors=True)
+    db.delete(pat)
+    db.commit()
+    return None
