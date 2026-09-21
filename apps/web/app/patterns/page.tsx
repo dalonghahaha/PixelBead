@@ -317,13 +317,13 @@ export default function PatternsPage() {
                       </span>
                       <span>
                         <strong className="text-gray-900 dark:text-gray-100">
-                          {usage.total_count.toLocaleString()}
+                          {usage.totalCount.toLocaleString()}
                         </strong>{' '}
                         {locale === 'en' ? 'beads' : '颗'}
                       </span>
                       <span>
                         <strong className="text-gray-900 dark:text-gray-100">
-                          {usage.total_packs.toLocaleString()}
+                          {usage.totalPacks.toLocaleString()}
                         </strong>{' '}
                         {locale === 'en' ? `packs (${beadsPerPack}/pack)` : `包 (${beadsPerPack}/包)`}
                       </span>
