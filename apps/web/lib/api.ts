@@ -95,12 +95,16 @@ function rewritePatternAssetUrls(obj: unknown): void {
   }
   if (!obj || typeof obj !== 'object' || obj instanceof Date) return;
   const o = obj as Record<string, unknown>;
-  // 单个 PatternResult
+  // 单个 PatternResult(有 id 的就是)— 不管 previewUrl 原来是绝对还是相对 URL,
+  // 一律改写为 Next.js 反代路径。API 可能返绝对 (http://api:8000/... 不可达)
+  // 也可能返相对 (/patterns/... 在浏览器里会被解析为域名下的路径 → 404),
+  // 都走 /api/external/patterns/{id}/preview 让 Next.js 反代到 API。
+  // 幂等:如果已经是 /api/external/... 也会被改写,结果一样。
   if (typeof o.id === 'string') {
-    if (typeof o.previewUrl === 'string' && /^https?:/.test(o.previewUrl)) {
+    if (typeof o.previewUrl === 'string') {
       o.previewUrl = `/api/external/patterns/${o.id}/preview`;
     }
-    if (typeof o.symbolUrl === 'string' && /^https?:/.test(o.symbolUrl)) {
+    if (typeof o.symbolUrl === 'string') {
       o.symbolUrl = `/api/external/patterns/${o.id}/symbol`;
     }
   }
