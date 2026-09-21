@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { api, ApiError } from '@/lib/api';
+import { api, ApiError, type UsageReport } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useLocale } from '@/components/I18nProvider';
 import type { PatternResult } from '@pixelbead/shared';
@@ -16,7 +16,11 @@ export default function PatternsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [viewingSymbol, setViewingSymbol] = useState<PatternResult | null>(null);
+  const [viewing, setViewing] = useState<PatternResult | null>(null);
+  const [viewTab, setViewTab] = useState<'preview' | 'symbol'>('symbol');
+  const [usage, setUsage] = useState<UsageReport | null>(null);
+  const [usageLoading, setUsageLoading] = useState(false);
+  const [beadsPerPack, setBadsPerPack] = useState(500);
 
   useEffect(() => {
     if (ready && !isLoggedIn) router.push('/login');
@@ -31,6 +35,26 @@ export default function PatternsPage() {
       .catch((e) => setError(e instanceof ApiError ? e.message : '加载失败'))
       .finally(() => setLoading(false));
   }, [token]);
+
+  // 加载用户 beads_per_pack 设置
+  useEffect(() => {
+    if (!token) return;
+    api.getUserSettings(token).then((s) => setBadsPerPack(s.beads_per_pack)).catch(() => {});
+  }, [token]);
+
+  // modal 打开后:拉用量
+  useEffect(() => {
+    if (!viewing || !token) return;
+    setViewTab('symbol');
+    setUsage(null);
+    setUsageLoading(true);
+    api
+      .getUsage(viewing.id, token, beadsPerPack)
+      .then(setUsage)
+      .catch(() => setUsage(null))
+      .finally(() => setUsageLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewing?.id, token]);
 
   async function handleDelete(p: PatternResult) {
     if (!token) return;
@@ -48,6 +72,28 @@ export default function PatternsPage() {
       setError(e instanceof ApiError ? e.message : '删除失败');
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  async function downloadUsageCsv() {
+    if (!viewing || !token) return;
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/patterns/${viewing.id}/usage.csv?beads_per_pack=${beadsPerPack}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pixelbead-usage-${viewing.id.slice(0, 8)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '下载失败');
     }
   }
 
@@ -133,24 +179,22 @@ export default function PatternsPage() {
               <div className="text-xs text-gray-400">
                 {new Date(p.createdAt).toLocaleString('zh-CN')}
               </div>
-              {p.symbolUrl && (
-                <div className="flex items-center justify-between pt-1 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setViewingSymbol(p)}
-                    className="text-xs text-primary-600 hover:underline"
-                  >
-                    {locale === 'en' ? 'View symbol' : '查看符号图'}
-                  </button>
-                  <a
-                    href={p.symbolUrl}
-                    download={`pattern-${p.id}.png`}
-                    className="text-xs text-gray-500 hover:underline"
-                  >
-                    {locale === 'en' ? 'Download' : '下载'}
-                  </a>
-                </div>
-              )}
+              <div className="flex items-center justify-between pt-1 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setViewing(p)}
+                  className="text-xs text-primary-600 hover:underline"
+                >
+                  {locale === 'en' ? 'View' : '查看'}
+                </button>
+                <a
+                  href={p.symbolUrl}
+                  download={`pattern-${p.id}.png`}
+                  className="text-xs text-gray-500 hover:underline"
+                >
+                  {locale === 'en' ? 'Download' : '下载'}
+                </a>
+              </div>
               <button
                 type="button"
                 onClick={() => handleDelete(p)}
@@ -170,47 +214,169 @@ export default function PatternsPage() {
         ))}
       </div>
 
-      {/* 符号图查看 modal */}
-      {viewingSymbol && viewingSymbol.symbolUrl && (
+      {/* 预览 / 符号图 + 色号统计 modal */}
+      {viewing && (viewing.previewUrl || viewing.symbolUrl) && (
         <div
           role="dialog"
           aria-modal="true"
           className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
-          onClick={() => setViewingSymbol(null)}
+          onClick={() => setViewing(null)}
         >
           <div
-            className="bg-white dark:bg-gray-900 rounded-lg p-4 max-w-4xl max-h-[90vh] overflow-auto"
+            className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-6xl max-h-[92vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="font-semibold">
-                {locale === 'en' ? 'Symbol Chart' : '符号图'} ·{' '}
-                <span className="font-mono text-gray-500">
-                  {viewingSymbol.id.slice(0, 8)}
-                </span>
-              </h3>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {viewing.width}×{viewing.height}{' '}
+                  <span className="text-gray-400">·</span>{' '}
+                  <span className="font-mono text-gray-500">
+                    {viewing.id.slice(0, 8)}
+                  </span>
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {viewing.palette}{' '}
+                  <span className="text-gray-400">·</span>{' '}
+                  {new Date(viewing.createdAt).toLocaleString('zh-CN')}
+                </p>
+              </div>
               <button
                 type="button"
                 aria-label="关闭"
-                onClick={() => setViewingSymbol(null)}
-                className="w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-2xl leading-none"
+                onClick={() => setViewing(null)}
+                className="w-9 h-9 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-2xl leading-none flex items-center justify-center"
               >
                 ×
               </button>
             </div>
-            <img
-              src={viewingSymbol.symbolUrl}
-              alt="符号图"
-              className="max-w-full mx-auto"
-            />
-            <div className="flex gap-3 mt-3 justify-end">
-              <a
-                href={viewingSymbol.symbolUrl}
-                download={`pattern-${viewingSymbol.id}.png`}
-                className="px-3 py-1.5 bg-primary-600 text-white text-sm rounded hover:bg-primary-700"
+
+            {/* Tab 切换 */}
+            <div className="flex border-b px-6 bg-gray-50 dark:bg-gray-900/50 items-center">
+              <button
+                type="button"
+                onClick={() => setViewTab('symbol')}
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition ${
+                  viewTab === 'symbol'
+                    ? 'border-primary-600 text-primary-700'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
               >
-                {locale === 'en' ? 'Download' : '下载符号图'}
+                {locale === 'en' ? 'Symbol Chart' : '符号图'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewTab('preview')}
+                disabled={!viewing.previewUrl}
+                className={`px-4 py-3 text-sm font-medium border-b-2 transition disabled:opacity-40 disabled:cursor-not-allowed ${
+                  viewTab === 'preview'
+                    ? 'border-primary-600 text-primary-700'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {locale === 'en' ? 'Preview' : '拼豆预览'}
+              </button>
+              <div className="flex-1" />
+              <a
+                href={viewTab === 'symbol' ? viewing.symbolUrl! : viewing.previewUrl!}
+                download={`pattern-${viewing.id}-${viewTab}.png`}
+                className="self-center text-xs text-primary-600 hover:underline"
+              >
+                {locale === 'en' ? '↓ Download this image' : '↓ 下载当前图'}
               </a>
+            </div>
+
+            {/* 图片区 */}
+            <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
+              <img
+                src={viewTab === 'symbol' ? viewing.symbolUrl! : viewing.previewUrl!}
+                alt={viewTab === 'symbol' ? '符号图' : '拼豆预览'}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+
+            {/* 色号统计 */}
+            <div className="border-t bg-white dark:bg-gray-900 px-6 py-4">
+              {usageLoading ? (
+                <div className="text-sm text-gray-500">
+                  {locale === 'en' ? 'Loading color stats…' : '加载色号统计…'}
+                </div>
+              ) : usage ? (
+                <>
+                  <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      {locale === 'en' ? 'Color Stats' : '色号统计'}
+                    </h4>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span>
+                        <strong className="text-gray-900 dark:text-gray-100">
+                          {usage.items.length}
+                        </strong>{' '}
+                        {locale === 'en' ? 'colors' : '种色号'}
+                      </span>
+                      <span>
+                        <strong className="text-gray-900 dark:text-gray-100">
+                          {usage.total_count.toLocaleString()}
+                        </strong>{' '}
+                        {locale === 'en' ? 'beads' : '颗'}
+                      </span>
+                      <span>
+                        <strong className="text-gray-900 dark:text-gray-100">
+                          {usage.total_packs.toLocaleString()}
+                        </strong>{' '}
+                        {locale === 'en' ? `packs (${beadsPerPack}/pack)` : `包 (${beadsPerPack}/包)`}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-48 overflow-y-auto">
+                    {usage.items
+                      .slice()
+                      .sort((a, b) => b.count - a.count)
+                      .map((item) => (
+                        <div
+                          key={item.code}
+                          className="flex flex-col items-center p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-center"
+                          title={`${item.code} ${item.name_zh || item.name_en || ''} · ${item.count}颗 / ${item.packs}包`}
+                        >
+                          <span
+                            className="w-8 h-8 rounded border border-gray-300 dark:border-gray-600 mb-1"
+                            style={{ backgroundColor: item.rgb }}
+                            aria-hidden="true"
+                          />
+                          <span className="font-mono text-xs font-semibold">
+                            {item.code}
+                          </span>
+                          <span className="text-[10px] text-gray-500">
+                            ×{item.count}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </>
+              ) : (
+                <div className="text-sm text-gray-400">
+                  {locale === 'en' ? 'No usage data' : '暂无用量数据'}
+                </div>
+              )}
+            </div>
+
+            {/* Footer 操作 */}
+            <div className="border-t px-6 py-3 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
+              <Link
+                href={`/patterns/${viewing.id}`}
+                className="text-sm text-primary-600 hover:underline"
+              >
+                {locale === 'en' ? 'Open full detail page →' : '打开详情页 →'}
+              </Link>
+              <button
+                type="button"
+                onClick={downloadUsageCsv}
+                disabled={!usage}
+                className="px-3 py-1.5 text-sm bg-blue-700 text-white rounded hover:bg-blue-800 transition disabled:opacity-40"
+              >
+                📄 {locale === 'en' ? 'Download usage CSV' : '下载用量清单 (CSV)'}
+              </button>
             </div>
           </div>
         </div>
