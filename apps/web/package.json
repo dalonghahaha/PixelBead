@@ -8,7 +8,10 @@
     "start": "next start -p 3000",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "echo 'no tests yet'"
+    "test": "echo 'no tests yet'",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots",
+    "test:e2e:report": "playwright show-report ../../playwright-report"
   },
   "dependencies": {
     "@pixelbead/shared": "workspace:*",

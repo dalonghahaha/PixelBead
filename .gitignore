@@ -58,3 +58,9 @@ apps/api/uploads/
 apps/api/storage/
 apps/web/.next/
 screenshots/
+
+# Playwright
+apps/web/test-results/
+playwright-report/
+apps/web/blob-report/
+apps/web/playwright/.cache/

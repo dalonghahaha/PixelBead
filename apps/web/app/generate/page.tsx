@@ -108,10 +108,15 @@ export default function GeneratePage() {
         {/* 左侧:上传 + 预览 */}
         <div className="space-y-4">
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <label htmlFor="gen-file-input" className="sr-only">
+              选择图片文件
+            </label>
             <input
+              id="gen-file-input"
               type="file"
               accept="image/jpeg,image/png,image/webp"
               onChange={onFileChange}
+              aria-label="选择图片文件"
               className="block mx-auto"
             />
             <p className="text-xs text-gray-500 mt-2">
@@ -168,8 +173,11 @@ export default function GeneratePage() {
         {/* 右侧:参数 */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">色卡</label>
+            <label htmlFor="gen-palette" className="block text-sm font-medium mb-1">
+              色卡
+            </label>
             <select
+              id="gen-palette"
               value={palette}
               onChange={(e) => setPalette(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg"
@@ -187,10 +195,11 @@ export default function GeneratePage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label htmlFor="gen-width" className="block text-sm font-medium mb-1">
                 宽(格)
               </label>
               <input
+                id="gen-width"
                 type="number"
                 min={8}
                 max={200}
@@ -200,10 +209,11 @@ export default function GeneratePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label htmlFor="gen-height" className="block text-sm font-medium mb-1">
                 高(格)
               </label>
               <input
+                id="gen-height"
                 type="number"
                 min={8}
                 max={200}
@@ -221,10 +231,11 @@ export default function GeneratePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="gen-max-colors" className="block text-sm font-medium mb-1">
               限色数(留空不限)
             </label>
             <input
+              id="gen-max-colors"
               type="number"
               min={2}
               max={221}
@@ -238,8 +249,11 @@ export default function GeneratePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">预处理</label>
+            <label htmlFor="gen-prefilter" className="block text-sm font-medium mb-1">
+              预处理
+            </label>
             <select
+              id="gen-prefilter"
               value={prefilter}
               onChange={(e) => setPrefilter(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg"
@@ -250,10 +264,11 @@ export default function GeneratePage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label htmlFor="gen-cleanup" className="block text-sm font-medium mb-1">
               杂色清理
             </label>
             <select
+              id="gen-cleanup"
               value={cleanup}
               onChange={(e) => setCleanup(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg"
