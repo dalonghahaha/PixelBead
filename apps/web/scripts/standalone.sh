@@ -102,15 +102,30 @@ cmd_daemon() {
   [ -d "$STANDALONE_DIR/.next/static" ] || copy_static
 
   cd "$STANDALONE_DIR"
-  nohup node server.js > "$LOG_FILE" 2>&1 &
-  echo $! > "$PID_FILE"
+
+  # ★ 必须 setsid:OpenClaw gateway 的 service-child-group-anchor 在 exec session 结束时
+  # 会 SIGKILL 整个进程组。nohup 不够,因为节点进程组在同一 anchor 下。
+  # setsid 开新 session + 进程组,完全脱离 OpenClaw 监管。
+  #
+  # ★ quoting 糙点:上版用 "sh -c \"... '$VAR' ...\"" 会出现内层单引号不闭合导致
+  # sh: unexpected EOF while looking for matching `' 语法错。改为外双引号 + 路径直接
+  # 由外 shell 展开(变量可控,安全)。\$\$ 转义后进入 sh 还是字面 $$ → sh 拿到自己的 PID。
+  setsid sh -c "echo \$\$ > $PID_FILE; exec node $STANDALONE_DIR/server.js" \
+    > "$LOG_FILE" 2>&1 < /dev/null &
+  disown 2>/dev/null || true
   sleep 1
 
-  # 校验进程真的活了
-  if kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
-    log "✅ 已起 PID $(cat "$PID_FILE"),日志: $LOG_FILE"
+  # PID_FILE 是 sh 在 exec node 前写的 → 现在是 node 的 PID(exec 不换 PID)
+  NEW_PID="$(cat "$PID_FILE" 2>/dev/null || echo)"
+  if [ -n "$NEW_PID" ] && kill -0 "$NEW_PID" 2>/dev/null; then
+    CHILD_SID="$(ps -o sid= -p "$NEW_PID" 2>/dev/null | tr -d ' ')"
+    if [ -n "$CHILD_SID" ] && [ "$CHILD_SID" != "$$" ]; then
+      log "✅ 已起 PID $NEW_PID (新 session=$CHILD_SID),日志: $LOG_FILE"
+    else
+      warn "起是起了,但 session 没脱钩(sid=$CHILD_SID)——可能下次 exec session 结束时被回收"
+    fi
   else
-    fail "进程启动失败,看日志: tail -20 $LOG_FILE"
+    fail "进程启动失败或 PID_FILE 未写,看日志: tail -20 $LOG_FILE"
   fi
 }
 
