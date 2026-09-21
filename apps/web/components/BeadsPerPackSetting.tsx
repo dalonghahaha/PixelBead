@@ -47,7 +47,7 @@ export default function BeadsPerPackSetting({ value, onSave, locale = 'zh' }: Pr
           className="w-32 px-3 py-2 border rounded-lg font-mono"
         />
       </label>
-      {error && <div className="text-sm text-red-600">⚠️ {error}</div>}
+      {error && <div className="text-sm text-red-700">⚠️ {error}</div>}
       <button
         type="submit"
         disabled={!isDirty}

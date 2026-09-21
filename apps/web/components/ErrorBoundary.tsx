@@ -60,7 +60,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <h2 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
             ⚠️ 出错了
           </h2>
-          <p className="text-sm text-red-600 dark:text-red-400 mb-4">
+          <p className="text-sm text-red-700 dark:text-red-400 mb-4">
             {this.state.error.message}
           </p>
           <button

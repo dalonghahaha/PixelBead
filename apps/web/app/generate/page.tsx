@@ -162,7 +162,7 @@ export default function GeneratePage() {
               )}
               <Link
                 href="/patterns"
-                className="inline-block text-sm text-primary-600 hover:underline"
+                className="inline-block text-sm text-primary-700 hover:underline"
               >
                 查看我的图纸 →
               </Link>
@@ -288,7 +288,7 @@ export default function GeneratePage() {
           </label>
 
           {error && (
-            <div className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded">
+            <div className="text-red-700 text-sm bg-red-50 px-3 py-2 rounded">
               {error}
             </div>
           )}
@@ -296,7 +296,7 @@ export default function GeneratePage() {
           <button
             onClick={submit}
             disabled={!file || submitting}
-            className="w-full py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition font-medium"
+            className="w-full py-3 bg-primary-700 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition font-medium"
           >
             {submitting ? '生成中(可能需要几秒)…' : '生成图纸'}
           </button>

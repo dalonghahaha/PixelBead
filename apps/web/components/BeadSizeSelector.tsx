@@ -51,7 +51,7 @@ export default function BeadSizeSelector({ value, onChange, locale = 'zh' }: Pro
                 }}
                 className={`px-3 py-2 border rounded-lg text-sm transition cursor-pointer text-center ${
                   selected
-                    ? 'border-primary-600 bg-primary-50 text-primary-700 font-medium'
+                    ? 'border-primary-700 bg-primary-50 text-primary-700 font-medium'
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
               >

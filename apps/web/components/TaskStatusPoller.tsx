@@ -92,7 +92,7 @@ export default function TaskStatusPoller({
     return (
       <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
         <div className="text-red-700 dark:text-red-300">⚠️ {error}</div>
-        <Link href="/generate" className="mt-2 inline-block text-sm text-primary-600 hover:underline">
+        <Link href="/generate" className="mt-2 inline-block text-sm text-primary-700 hover:underline">
           ← 返回生成
         </Link>
       </div>
@@ -144,7 +144,7 @@ export default function TaskStatusPoller({
             ⚠️ {taskErrorMessage(task.error.code)}
           </div>
           {task.error.code === 'oom' && (
-            <div className="mt-1 text-xs text-red-600 dark:text-red-400">
+            <div className="mt-1 text-xs text-red-700 dark:text-red-400">
               提示:可尝试 ① 缩小图片尺寸 ② 用图片压缩工具压到 4MB 以下
             </div>
           )}
@@ -163,7 +163,7 @@ export default function TaskStatusPoller({
         <button
           type="button"
           onClick={handleCancel}
-          className="text-sm text-gray-500 hover:text-red-600 transition"
+          className="text-sm text-gray-500 hover:text-red-700 transition"
         >
           取消任务
         </button>
@@ -173,7 +173,7 @@ export default function TaskStatusPoller({
       {task.status === 'complete' && task.result_pattern_id && (
         <Link
           href={`/patterns/${task.result_pattern_id}`}
-          className="inline-block text-sm text-primary-600 hover:underline"
+          className="inline-block text-sm text-primary-700 hover:underline"
         >
           查看图纸 →
         </Link>

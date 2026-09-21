@@ -107,7 +107,7 @@ export default function PatternsPage() {
         <div className="flex gap-3">
           <Link
             href="/generate"
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+            className="px-4 py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-700"
           >
             {locale === 'en' ? '+ New' : '+ 新建'}
           </Link>
@@ -123,7 +123,7 @@ export default function PatternsPage() {
       {loading && <div className="text-center py-12">加载中…</div>}
 
       {error && (
-        <div className="text-red-600 bg-red-50 px-4 py-2 rounded mb-4">
+        <div className="text-red-700 bg-red-50 px-4 py-2 rounded mb-4">
           {error}
         </div>
       )}
@@ -131,7 +131,7 @@ export default function PatternsPage() {
       {!loading && items.length === 0 && (
         <div className="text-center py-12 text-gray-500">
           还没有图纸,去{' '}
-          <Link href="/generate" className="text-primary-600 underline">
+          <Link href="/generate" className="text-primary-700 underline">
             生成一个
           </Link>{' '}
           吧
@@ -183,7 +183,7 @@ export default function PatternsPage() {
                 <button
                   type="button"
                   onClick={() => setViewing(p)}
-                  className="text-xs text-primary-600 hover:underline"
+                  className="text-xs text-primary-700 hover:underline"
                 >
                   {locale === 'en' ? 'View' : '查看'}
                 </button>
@@ -199,7 +199,7 @@ export default function PatternsPage() {
                 type="button"
                 onClick={() => handleDelete(p)}
                 disabled={deletingId === p.id}
-                className="block w-full text-xs text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded py-1 mt-1 disabled:opacity-50"
+                className="block w-full text-xs text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded py-1 mt-1 disabled:opacity-50"
               >
                 {deletingId === p.id
                   ? locale === 'en'
@@ -259,7 +259,7 @@ export default function PatternsPage() {
                 onClick={() => setViewTab('symbol')}
                 className={`px-4 py-3 text-sm font-medium border-b-2 transition ${
                   viewTab === 'symbol'
-                    ? 'border-primary-600 text-primary-700'
+                    ? 'border-primary-700 text-primary-700'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -271,7 +271,7 @@ export default function PatternsPage() {
                 disabled={!viewing.previewUrl}
                 className={`px-4 py-3 text-sm font-medium border-b-2 transition disabled:opacity-40 disabled:cursor-not-allowed ${
                   viewTab === 'preview'
-                    ? 'border-primary-600 text-primary-700'
+                    ? 'border-primary-700 text-primary-700'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -281,7 +281,7 @@ export default function PatternsPage() {
               <a
                 href={viewTab === 'symbol' ? viewing.symbolUrl! : viewing.previewUrl!}
                 download={`pattern-${viewing.id}-${viewTab}.png`}
-                className="self-center text-xs text-primary-600 hover:underline"
+                className="self-center text-xs text-primary-700 hover:underline"
               >
                 {locale === 'en' ? '↓ Download this image' : '↓ 下载当前图'}
               </a>
@@ -365,7 +365,7 @@ export default function PatternsPage() {
             <div className="border-t px-6 py-3 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
               <Link
                 href={`/patterns/${viewing.id}`}
-                className="text-sm text-primary-600 hover:underline"
+                className="text-sm text-primary-700 hover:underline"
               >
                 {locale === 'en' ? 'Open full detail page →' : '打开详情页 →'}
               </Link>

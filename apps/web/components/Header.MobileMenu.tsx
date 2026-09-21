@@ -114,7 +114,7 @@ export function MobileMenu({ loggedIn }: { loggedIn: boolean }) {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="text-left px-4 py-3 min-h-[44px] inline-flex items-center text-base text-red-600 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
+                    className="text-left px-4 py-3 min-h-[44px] inline-flex items-center text-base text-red-700 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg"
                   >
                     {t('nav.logout')}
                   </button>

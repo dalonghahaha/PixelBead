@@ -71,7 +71,7 @@ export default function PatternDetailPage({ params }: Props) {
   if (!isLoggedIn) return null;
   if (error && !pattern) return (
     <div className="max-w-3xl mx-auto py-12">
-      <div className="text-red-600 bg-red-50 px-4 py-3 rounded">⚠️ {error}</div>
+      <div className="text-red-700 bg-red-50 px-4 py-3 rounded">⚠️ {error}</div>
     </div>
   );
   if (!pattern) return <div className="py-12 text-center">加载图纸…</div>;
@@ -92,7 +92,7 @@ export default function PatternDetailPage({ params }: Props) {
           <h1 className="text-3xl font-bold">图纸详情</h1>
           <p className="text-sm text-gray-500 font-mono mt-1">{pattern.id}</p>
         </div>
-        <a href="/patterns" className="text-sm text-primary-600 hover:underline">
+        <a href="/patterns" className="text-sm text-primary-700 hover:underline">
           ← 返回列表
         </a>
       </div>

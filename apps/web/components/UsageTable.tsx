@@ -64,7 +64,7 @@ export default function UsageTable({ patternId, token, beadsPerPack = 500, local
     }
   };
 
-  if (error) return <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">⚠️ {error}</div>;
+  if (error) return <div className="text-sm text-red-700 bg-red-50 px-3 py-2 rounded">⚠️ {error}</div>;
   if (!report) return <div className="text-sm text-gray-500">加载用量清单…</div>;
 
   const items = [...report.items].sort((a, b) =>

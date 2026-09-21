@@ -71,7 +71,7 @@ export default function PrivacyPage() {
         <h2 className="text-xl font-semibold">4. 联系我们</h2>
         <p>
           隐私相关问题:请发送邮件至{' '}
-          <a href="mailto:privacy@pixelbead.app" className="text-primary-600 hover:underline">
+          <a href="mailto:privacy@pixelbead.app" className="text-primary-700 hover:underline">
             privacy@pixelbead.app
           </a>
         </p>

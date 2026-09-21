@@ -57,7 +57,7 @@ export default function ExportPdfPanel({ patternId, token }: { patternId: string
         )}
       </button>
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+        <div className="text-sm text-red-700 bg-red-50 px-3 py-2 rounded">
           ⚠️ {error}
         </div>
       )}

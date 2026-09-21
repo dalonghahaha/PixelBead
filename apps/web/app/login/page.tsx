@@ -80,20 +80,24 @@ export default function LoginPage() {
         )}
 
         <div>
-          <label className="block text-sm font-medium mb-1">{t('auth.passwordLabel')}</label>
+          <label htmlFor="login-password" className="block text-sm font-medium mb-1">
+            {t('auth.passwordLabel')}
+          </label>
           <input
+            id="login-password"
             type="password"
             required
             minLength={mode === 'register' ? 8 : 1}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-            placeholder={mode === 'register' ? '至少 8 位' : ''}
+            placeholder={mode === 'register' ? '至少 8 位' : ' '}
+            aria-label={t('auth.passwordLabel')}
           />
         </div>
 
         {error && (
-          <div className="text-red-600 text-sm bg-red-50 px-3 py-2 rounded">
+          <div className="text-red-700 text-sm bg-red-50 px-3 py-2 rounded">
             {error}
           </div>
         )}
@@ -101,7 +105,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition"
+          className="w-full py-2 bg-primary-700 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition"
         >
           {loading
             ? (locale === 'en' ? 'Processing…' : '处理中…')
@@ -117,7 +121,7 @@ export default function LoginPage() {
             还没账号?{' '}
             <button
               onClick={() => setMode('register')}
-              className="text-primary-600 hover:underline"
+              className="text-primary-700 hover:underline"
             >
               立即注册
             </button>
@@ -127,7 +131,7 @@ export default function LoginPage() {
             已有账号?{' '}
             <button
               onClick={() => setMode('login')}
-              className="text-primary-600 hover:underline"
+              className="text-primary-700 hover:underline"
             >
               返回登录
             </button>
