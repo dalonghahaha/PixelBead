@@ -56,7 +56,7 @@ export default function SettingsPage() {
       </p>
 
       {error && (
-        <div className="text-red-600 bg-red-50 px-4 py-3 rounded">⚠️ {error}</div>
+        <div className="text-red-700 bg-red-50 px-4 py-3 rounded">⚠️ {error}</div>
       )}
 
       {saved && (

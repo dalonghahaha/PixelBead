@@ -18,17 +18,17 @@ const SECTIONS: Section[] = [
           <p>3 步从照片到拼豆图纸:</p>
           <ol className="list-decimal pl-6 space-y-2 mt-2">
             <li>
-              打开「<a href="/generate" className="text-primary-600 underline">生成图纸</a>」,
+              打开「<a href="/generate" className="text-primary-700 underline">生成图纸</a>」,
               上传任意 JPG / PNG / WEBP 图片(最大 10MB)
             </li>
             <li>选择色板(MARD / Artkal / COCO 等)和网格大小,点「生成图纸」</li>
             <li>
-              转换完成后,在「<a href="/patterns" className="text-primary-600 underline">我的图纸</a>」查看预览图和符号图,
+              转换完成后,在「<a href="/patterns" className="text-primary-700 underline">我的图纸</a>」查看预览图和符号图,
               点「查看符号图」放大,或点「下载」保存 PNG
             </li>
           </ol>
           <p className="mt-3 text-sm text-gray-500">
-            首次使用需要 <a href="/login" className="text-primary-600 underline">注册账号</a>(免费,
+            首次使用需要 <a href="/login" className="text-primary-700 underline">注册账号</a>(免费,
             邮箱即可)。
           </p>
         </>
@@ -41,17 +41,17 @@ const SECTIONS: Section[] = [
           <p>3 steps from photo to bead pattern:</p>
           <ol className="list-decimal pl-6 space-y-2 mt-2">
             <li>
-              Open <a href="/generate" className="text-primary-600 underline">Generate</a>,
+              Open <a href="/generate" className="text-primary-700 underline">Generate</a>,
               upload any JPG / PNG / WEBP image (max 10MB)
             </li>
             <li>Pick a palette (MARD / Artkal / COCO etc.) and grid size, then click "Generate"</li>
             <li>
-              When done, head to <a href="/patterns" className="text-primary-600 underline">My Patterns</a> to
+              When done, head to <a href="/patterns" className="text-primary-700 underline">My Patterns</a> to
               view the preview and symbol chart, click "View symbol" to enlarge, or "Download" to save PNG
             </li>
           </ol>
           <p className="mt-3 text-sm text-gray-500">
-            First time? <a href="/login" className="text-primary-600 underline">Sign up</a> for free
+            First time? <a href="/login" className="text-primary-700 underline">Sign up</a> for free
             (email only).
           </p>
         </>
@@ -345,7 +345,7 @@ export default function DocsPage() {
             <li key={s.id}>
               <a
                 href={`#${s.id}`}
-                className="text-primary-600 hover:underline"
+                className="text-primary-700 hover:underline"
               >
                 {isZh ? s.zh.title : s.en.title}
               </a>
@@ -371,13 +371,13 @@ export default function DocsPage() {
       <div className="mt-16 pt-8 border-t text-sm text-gray-500">
         {isZh ? (
           <>
-            还有问题?<a href="mailto:hi@pixel.iclub.com.cn" className="text-primary-600 underline ml-1">联系我们</a>
-            或在 <a href="https://github.com/dalonghahaha/PixelBead" className="text-primary-600 underline ml-1" target="_blank" rel="noreferrer">GitHub</a> 提 issue。
+            还有问题?<a href="mailto:hi@pixel.iclub.com.cn" className="text-primary-700 underline ml-1">联系我们</a>
+            或在 <a href="https://github.com/dalonghahaha/PixelBead" className="text-primary-700 underline ml-1" target="_blank" rel="noreferrer">GitHub</a> 提 issue。
           </>
         ) : (
           <>
-            Still have questions? <a href="mailto:hi@pixel.iclub.com.cn" className="text-primary-600 underline ml-1">Contact us</a> or
-            open an issue on <a href="https://github.com/dalonghahaha/PixelBead" className="text-primary-600 underline ml-1" target="_blank" rel="noreferrer">GitHub</a>.
+            Still have questions? <a href="mailto:hi@pixel.iclub.com.cn" className="text-primary-700 underline ml-1">Contact us</a> or
+            open an issue on <a href="https://github.com/dalonghahaha/PixelBead" className="text-primary-700 underline ml-1" target="_blank" rel="noreferrer">GitHub</a>.
           </>
         )}
       </div>

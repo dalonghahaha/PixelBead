@@ -5,13 +5,37 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Form control tokens (light) */
+  --input-bg: #ffffff;
+  --input-fg: #111827;
+  --input-border: #d1d5db;
+  --input-placeholder: #9ca3af;
+  --input-arrow: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%236b7280%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.06l3.71-3.83a.75.75%200%20111.08%201.04l-4.25%204.39a.75.75%200%2001-1.08%200L5.21%208.27a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E");
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    --input-bg: #1f2937;       /* gray-800 */
+    --input-fg: #f3f4f6;       /* gray-100 */
+    --input-border: #4b5563;   /* gray-600 */
+    --input-placeholder: #6b7280; /* gray-500 */
+    --input-arrow: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%239ca3af%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.06l3.71-3.83a.75.75%200%20111.08%201.04l-4.25%204.39a.75.75%200%2001-1.08%200L5.21%208.27a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E");
   }
+}
+
+/* 用户在 header 手动切深色(class="dark" on <html>),覆盖 prefers-color-scheme */
+html.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --input-bg: #1f2937;
+  --input-fg: #f3f4f6;
+  --input-border: #4b5563;
+  --input-placeholder: #6b7280;
+  --input-arrow: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%239ca3af%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.06l3.71-3.83a.75.75%200%20111.08%201.04l-4.25%204.39a.75.75%200%2001-1.08%200L5.21%208.27a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E");
 }
 
 body {
@@ -19,4 +43,83 @@ body {
   background: var(--background);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+/* ============================================================
+   表单控件全局深色适配 — 解决 input/select/textarea 闪白
+   ------------------------------------------------------------
+   之前的写法只靠 Tailwind dark: 工具类,需要每个控件手写,
+   一旦漏写就闪白。这里走 CSS 变量 + 全局规则,所有 form 控件
+   自动跟随 dark 模式。
+   ============================================================ */
+
+/* 文本输入 + 文本域 */
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+input[type='search'],
+input[type='url'],
+input[type='tel'],
+textarea {
+  background-color: var(--input-bg);
+  color: var(--input-fg);
+  border-color: var(--input-border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--input-placeholder);
+  opacity: 1; /* Firefox 默认 0.54,太淡 */
+}
+
+/* select — Chrome/Edge/Safari 都遵循 background-color/color/border-color */
+select {
+  background-color: var(--input-bg);
+  color: var(--input-fg);
+  border-color: var(--input-border);
+  /* 自定义箭头(去浏览器默认,改用 SVG) */
+  background-image: var(--input-arrow);
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1.25rem 1.25rem;
+  /* 给箭头留位置 */
+  padding-right: 2rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Firefox 的 select 内部 padding 补偿(箭头位置不一样) */
+@-moz-document url-prefix() {
+  select {
+    padding-right: 2.5rem;
+  }
+}
+
+/* select 打开后的 option 列表 — 浏览器控制有限,尽力:
+   - Chrome/Safari/Edge 现代版本:尊重 color/background
+   - Firefox:尊重 color/background
+   - 老的 Windows Chrome:可能仍白,但只是下拉瞬间,主体已修 */
+select option {
+  background-color: var(--input-bg);
+  color: var(--input-fg);
+}
+
+/* Chrome 自动填充的讨厌蓝底黄字 — 在 dark 下尤其难看 */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--input-fg);
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset;
+  caret-color: var(--input-fg);
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* checkbox / radio — 保留浏览器默认,只在 focus ring 上统一 */
+input[type='checkbox']:focus,
+input[type='radio']:focus {
+  outline: 2px solid var(--input-border);
+  outline-offset: 2px;
 }
