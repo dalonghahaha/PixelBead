@@ -11,6 +11,15 @@ import BeadSizeSelector from '@/components/BeadSizeSelector';
 import { plateSizeHint } from '@/lib/beadSize';
 import TaskStatusPoller from '@/components/TaskStatusPoller';
 import type { TaskCreateResponse } from '@/lib/task';
+import { squareImage, getImageSize, squaredPixelSize } from '@/lib/imageSquare';
+
+/**
+ * 豆板(底板)常用格子数 — 拼豆实物板对应格子数
+ * - 全部正方形(用户反馈:实物板多为方形)
+ * - 29/52/58/70/100 是 MARD / ARTKAL 国内最常见 5 档
+ * - 用户上传的图先自动 center-crop 成正方形,再用这个格子数缩放
+ */
+const BOARD_SIZE_PRESETS = [29, 52, 58, 70, 100] as const;
 
 export default function GeneratePage() {
   const router = useRouter();
@@ -19,36 +28,58 @@ export default function GeneratePage() {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [palette, setPalette] = useState('mard-221-alfonse-doudou');
-  const [width, setWidth] = useState(58);
-  const [height, setHeight] = useState(58);
+
+  // 豆板尺寸(正方形格子数) — 用户从常见 5 档选
+  const [boardSize, setBoardSize] = useState<number>(58);
+
   const [maxColors, setMaxColors] = useState<number | ''>('');
   const [prefilter, setPrefilter] = useState('smooth');
   const [cleanup, setCleanup] = useState('majority');
   const [dither, setDither] = useState(false);
-  const [beadSize, setBeadSize] = useState<BeadSize>(BEAD_SIZE_DEFAULT);  // ← 009 新增
+  const [beadSize, setBeadSize] = useState<BeadSize>(BEAD_SIZE_DEFAULT);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PatternResult | null>(null);
-  // ← 010 异步任务:大图时服务端返回 task_id,前端轮询进度
   const [asyncTaskId, setAsyncTaskId] = useState<string | null>(null);
+
+  // 上传图状态(用于显示原始尺寸 + 裁方提示)
+  const [originalSize, setOriginalSize] = useState<{ w: number; h: number } | null>(null);
+  const [squaredPreviewUrl, setSquaredPreviewUrl] = useState<string | null>(null);
+  const [squaring, setSquaring] = useState(false);
 
   useEffect(() => {
     api.palettes().then(setPalettes).catch(() => setPalettes([]));
   }, []);
 
-  // 已登录守卫
   useEffect(() => {
     if (ready && !isLoggedIn) {
       router.push('/login');
     }
   }, [ready, isLoggedIn, router]);
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] || null;
     setFile(f);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(f ? URL.createObjectURL(f) : null);
     setResult(null);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    if (squaredPreviewUrl) URL.revokeObjectURL(squaredPreviewUrl);
+    setSquaredPreviewUrl(null);
+    setPreviewUrl(f ? URL.createObjectURL(f) : null);
+    setOriginalSize(null);
+    if (!f) return;
+
+    try {
+      setSquaring(true);
+      const { w, h } = await getImageSize(f);
+      setOriginalSize({ w, h });
+      // 渲染一个小的方形预览(180px)给用户看
+      const blob = await squareImage(f, { size: 180, type: 'image/jpeg', quality: 0.85 });
+      setSquaredPreviewUrl(URL.createObjectURL(blob));
+    } catch (err) {
+      console.error('square preview failed:', err);
+    } finally {
+      setSquaring(false);
+    }
   };
 
   const submit = async () => {
@@ -56,21 +87,27 @@ export default function GeneratePage() {
     setSubmitting(true);
     setError(null);
     try {
+      // 上传前先 center-crop 成正方形,后端只接收正方形
+      const squaredBlob = await squareImage(file);
+      const squaredFile = new File([squaredBlob], file.name, {
+        type: squaredBlob.type || 'image/png',
+      });
+
       const r = await api.createPattern(
-        file,
+        squaredFile,
         {
           palette,
-          width,
-          height,
+          width: boardSize,
+          height: boardSize, // 豆板正方形,宽=高
           max_colors: maxColors === '' ? undefined : Number(maxColors),
           prefilter,
           cleanup,
           dither,
-          bead_size: beadSize,  // ← 009 新增(后端字段名)
+          bead_size: beadSize,
         },
         token,
       );
-      // ← 010 分流:大图服务端返回 task_id(异步任务),小图返回 PatternResult(同步)
+
       if ('task_id' in r && (r as TaskCreateResponse).status === 'queued') {
         setAsyncTaskId((r as TaskCreateResponse).task_id);
         setResult(null);
@@ -87,7 +124,6 @@ export default function GeneratePage() {
   if (!ready) return <div className="py-12 text-center">加载中…</div>;
   if (!isLoggedIn) return null;
 
-  // ← 010 异步任务:大图走轮询组件(替换 result 区块)
   if (asyncTaskId && token) {
     return (
       <div className="max-w-3xl mx-auto py-8">
@@ -99,6 +135,8 @@ export default function GeneratePage() {
       </div>
     );
   }
+
+  const willBeSquaredTo = originalSize ? squaredPixelSize(originalSize.w, originalSize.h) : null;
 
   return (
     <div className="max-w-5xl mx-auto py-8">
@@ -126,11 +164,41 @@ export default function GeneratePage() {
 
           {previewUrl && (
             <div>
-              <div className="text-sm font-medium mb-1">原图预览</div>
+              <div className="text-sm font-medium mb-1">
+                原图 {originalSize ? `${originalSize.w}×${originalSize.h}` : ''}
+              </div>
               <img
                 src={previewUrl}
                 alt="原图"
                 className="max-w-full max-h-64 border rounded"
+              />
+            </div>
+          )}
+
+          {originalSize && (
+            <div className="text-xs text-gray-600 bg-amber-50 px-3 py-2 rounded border border-amber-200">
+              <strong>自动处理:</strong>{' '}
+              {originalSize.w === originalSize.h ? (
+                <>豆板为正方形,图也是正方形 ({originalSize.w}×{originalSize.h}),不做额外裁切。</>
+              ) : (
+                <>
+                  豆板为正方形,非正方形图会被{' '}
+                  <strong>中心裁切</strong> 为 {willBeSquaredTo}×{willBeSquaredTo} 像素
+                  <span className="text-amber-700">
+                    {' '}(原图 {originalSize.w}×{originalSize.h} 比例 {Math.round((originalSize.w / originalSize.h) * 100) / 100})
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+
+          {squaredPreviewUrl && (
+            <div>
+              <div className="text-sm font-medium mb-1">裁方预览</div>
+              <img
+                src={squaredPreviewUrl}
+                alt="裁方预览"
+                className="w-44 h-44 object-cover border rounded"
               />
             </div>
           )}
@@ -193,41 +261,31 @@ export default function GeneratePage() {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label htmlFor="gen-width" className="block text-sm font-medium mb-1">
-                宽(格)
-              </label>
-              <input
-                id="gen-width"
-                type="number"
-                min={8}
-                max={200}
-                value={width}
-                onChange={(e) => setWidth(Number(e.target.value))}
-                className="w-full px-3 py-2 border rounded-lg"
-              />
-            </div>
-            <div>
-              <label htmlFor="gen-height" className="block text-sm font-medium mb-1">
-                高(格)
-              </label>
-              <input
-                id="gen-height"
-                type="number"
-                min={8}
-                max={200}
-                value={height}
-                onChange={(e) => setHeight(Number(e.target.value))}
-                className="w-full px-3 py-2 border rounded-lg"
-              />
-            </div>
+          {/* 豆板尺寸预设(替代旧的 宽/高 输入) */}
+          <div>
+            <label htmlFor="gen-board-size" className="block text-sm font-medium mb-1">
+              豆板尺寸(正方形格子数)
+            </label>
+            <select
+              id="gen-board-size"
+              value={boardSize}
+              onChange={(e) => setBoardSize(Number(e.target.value))}
+              className="w-full px-3 py-2 border rounded-lg"
+            >
+              {BOARD_SIZE_PRESETS.map((n) => (
+                <option key={n} value={n}>
+                  {n} × {n} 格
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              市面常见: 29 / 52 / 58 / 70 / 100 格(MARD / ARTKAL 实物板尺寸)
+            </p>
           </div>
 
-          {/* ← 009 新增:拼豆规格选择 */}
           <BeadSizeSelector value={beadSize} onChange={setBeadSize} locale="zh" />
-          <div className="text-xs text-gray-600 bg-gray-50 px-3 py-2 rounded">
-            底板提示:{plateSizeHint(width, height, beadSize, 'zh')}
+          <div className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 px-3 py-2 rounded">
+            底板提示:{plateSizeHint(boardSize, boardSize, beadSize, 'zh')}
           </div>
 
           <div>

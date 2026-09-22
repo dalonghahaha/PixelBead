@@ -45,14 +45,25 @@ test.describe('Convert page', () => {
     for (const id of [
       'gen-file-input',
       'gen-palette',
-      'gen-width',
-      'gen-height',
+      'gen-board-size',
       'gen-max-colors',
       'gen-prefilter',
       'gen-cleanup',
     ]) {
       await expect(page.locator(`#${id}`)).toBeVisible();
     }
+
+    // G-08 豆板尺寸预设 = 5 个常见正方形格子数
+    const boardSizeOptions = page.locator('#gen-board-size option');
+    await expect(boardSizeOptions).toHaveCount(5);
+    const labels = await boardSizeOptions.allTextContents();
+    expect(labels).toEqual([
+      '29 × 29 格',
+      '52 × 52 格',
+      '58 × 58 格',
+      '70 × 70 格',
+      '100 × 100 格',
+    ]);
 
     // G-03 截图全页
     await expect(page).toHaveScreenshot('convert-full.png', { fullPage: true });
